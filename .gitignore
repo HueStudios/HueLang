@@ -1,6 +1,15 @@
 # Prerequisites
 *.d
 
+bin/*
+obj/*
+.vscode/
+
+
+Makefile
+*.h
+*.make
+
 # Object files
 *.o
 *.ko
