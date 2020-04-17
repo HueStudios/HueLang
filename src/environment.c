@@ -32,7 +32,7 @@ typedef struct Environment {
 
 #include "environment.h"
 
-void create_environment() {
+Environment *create_environment() {
   Environment *self = malloc(sizeof(Environment));
   self->execution_stack = create_stack();
   self->value_stack = create_stack();
