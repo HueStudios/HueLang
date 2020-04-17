@@ -47,6 +47,9 @@ Environment *create_environment() {
 }
 
 EnvironmentState get_state_environment(Environment *self) {
+  if (self->state_stack->size == 0) {
+    return normalstate;
+  }
   return *(EnvironmentState*)peek_stack(self->state_stack);
 }
 
