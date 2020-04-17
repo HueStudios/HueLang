@@ -22,7 +22,7 @@ DoublyLinkedList *create_doublylinked() {
   return result;
 }
 
-void append_doublylinked(DoublyLinkedList *self, void *value) {
+void preppend_doublylinked(DoublyLinkedList *self, void *value) {
   DoublyLinkedListNode *toappend = malloc(sizeof(DoublyLinkedListNode));
   toappend->value = toappend;
   toappend->next = NULL;

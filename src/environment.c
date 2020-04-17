@@ -24,6 +24,7 @@ typedef struct Environment {
   Stack *state_stack;
   Dictionary **dictionaries;
   LinkedList *word_buffer;
+  char *word_name;
   unsigned char running;
   unsigned int comment;
 } Environment; 
@@ -137,9 +138,11 @@ void run_environment(Environment *self) {
     if (self->comment > 0) return;
 
     if (get_state_environment(self) == compilestate) {
-      if (!eval_in_environment(self, word)) {
+      if (self->word_name == NULL) {
+        self->word_name = word;
+      } else if (!eval_in_environment(self, word)) {
         ArbitraryValue *value = token_to_whatever(word, 0);
-        append_linked(self->word_buffer, value);
+        preppend_linked(self->word_buffer, value);
       }      
     }
 
@@ -147,7 +150,7 @@ void run_environment(Environment *self) {
       ArbitraryValue *value = malloc(sizeof(ArbitraryValue));
       value->value = token_to_symbol(word);
       value->type = symboltype;
-      append_linked(self->word_buffer, value);
+      preppend_linked(self->word_buffer, value);
       if (strcmp(word, "end")) {
         pop_state_environment(self);
       }

@@ -19,7 +19,7 @@ LinkedList *create_linked() {
   return result;
 }
 
-void append_linked(LinkedList *self, void *value) {
+void prepend_linked(LinkedList *self, void *value) {
   LinkedListNode *toappend = malloc(sizeof(LinkedListNode));
   toappend->value = toappend;
   toappend->next = self->head;
