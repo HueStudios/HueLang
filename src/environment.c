@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "stack.h"
 #include "dictionary.h"
-#include "doublylinked.h"
+#include "linked.h"
 #include "typeparsing.h"
 
 typedef enum EnvironmentState {
@@ -23,7 +23,7 @@ typedef struct Environment {
   Stack *value_stack;
   Stack *state_stack;
   Dictionary **dictionaries;
-  DoublyLinkedList *word_buffer;
+  LinkedList *word_buffer;
   unsigned char running;
   unsigned int comment;
 } Environment; 
@@ -40,7 +40,7 @@ Environment *create_environment() {
   self->dictionaries[0] = create_dictionary();
   self->dictionaries[1] = create_dictionary();
   self->dictionaries[2] = create_dictionary();
-  self->word_buffer = create_doublylinked();
+  self->word_buffer = create_linked();
   self->comment = 0;
   self->running = 1;
   return self;
@@ -72,10 +72,8 @@ void execute_in_environment(Environment *self, char *word) {
 }
 
 void execute_multiple_in_environment(Environment *self, DoublyLinkedList *words) {
-  for (DoublyLinkedListNode *focus = words->head; 
+  for (LinkedListNode *focus = words->head; 
       focus != NULL; focus = focus->next) {
-      if (focus == words->head) continue;
-      if (focus == words->tail) continue;
       ArbitraryValue *val = focus->value;
       char *represented_word = val->value;
       execute_in_environment(self, represented_word);
@@ -103,10 +101,8 @@ unsigned char eval_in_environment(Environment *self, char* word) {
     }
     else if (contains_key_dictionary(self->dictionaries[secondarydictionary], 
       word)) {
-      for (DoublyLinkedListNode *focus = self->word_buffer->head; 
+      for (LinkedListNode *focus = self->word_buffer->head; 
         focus != NULL; focus = focus->next) {
-        if (focus == self->word_buffer->head) continue;
-        if (focus == self->word_buffer->tail) continue;
         ArbitraryValue *val = focus->value;
         char *represented_word = val->value;
         push_stack(self->execution_stack, represented_word);
@@ -143,7 +139,7 @@ void run_environment(Environment *self) {
     if (get_state_environment(self) == compilestate) {
       if (!eval_in_environment(self, word)) {
         ArbitraryValue *value = token_to_whatever(word, 0);
-        append_doublylinked(self->word_buffer, value);
+        append_linked(self->word_buffer, value);
       }      
     }
 
@@ -151,7 +147,7 @@ void run_environment(Environment *self) {
       ArbitraryValue *value = malloc(sizeof(ArbitraryValue));
       value->value = token_to_symbol(word);
       value->type = symboltype;
-      append_doublylinked(self->word_buffer, value);
+      append_linked(self->word_buffer, value);
       if (strcmp(word, "end")) {
         pop_state_environment(self);
       }
