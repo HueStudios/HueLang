@@ -26,7 +26,6 @@ typedef struct Environment {
   DoublyLinkedList *word_buffer;
   unsigned char running;
   unsigned int comment;
-  EnvironmentState state;
 } Environment; 
 #endif
 
@@ -47,6 +46,23 @@ Environment *create_environment() {
   return self;
 }
 
+EnvironmentState get_state_environment(Environment *self) {
+  return *(EnvironmentState*)peek_stack(self->state_stack);
+}
+
+EnvironmentState pop_state_environment(Environment *self) {
+  EnvironmentState *val = pop_stack(self->state_stack);
+  EnvironmentState result = *val;
+  free(val);
+  return result;
+}
+
+void push_state_environment(Environment *self, EnvironmentState state) {
+  EnvironmentState *topush = malloc(sizeof(EnvironmentState));
+  *topush = state;
+  push_stack(self->state_stack, topush);
+}
+
 void execute_in_environment(Environment *self, char *word) {
   push_stack(self->execution_stack, word);
   run_environment(self);
@@ -64,7 +80,7 @@ void execute_multiple_in_environment(Environment *self, DoublyLinkedList *words)
 }
 
 unsigned char eval_in_environment(Environment *self, char* word) {
-  if (self->state == compilestate) {
+  if (get_state_environment(self) == compilestate) {
     if (contains_key_dictionary(self->dictionaries[compiledictionary], 
       word)) {
       void (*word_function)(Environment*) 
@@ -74,7 +90,7 @@ unsigned char eval_in_environment(Environment *self, char* word) {
     }
   }
 
-  if (self->state == normalstate) {
+  if (get_state_environment(self) == normalstate) {
     if (contains_key_dictionary(self->dictionaries[primarydictionary], 
       word)) {
       void (*word_function)(Environment*) 
@@ -121,24 +137,24 @@ void run_environment(Environment *self) {
     }
     if (self->comment > 0) return;
 
-    if (self->state == compilestate) {
+    if (get_state_environment(self) == compilestate) {
       if (!eval_in_environment(self, word)) {
         ArbitraryValue *value = token_to_whatever(word, 0);
         append_doublylinked(self->word_buffer, value);
       }      
     }
 
-    if (self->state == hardcompilestate) {
+    if (get_state_environment(self) == hardcompilestate) {
       ArbitraryValue *value = malloc(sizeof(ArbitraryValue));
       value->value = token_to_symbol(word);
       value->type = symboltype;
       append_doublylinked(self->word_buffer, value);
       if (strcmp(word, "end")) {
-        pop_stack(self->state_stack);
+        pop_state_environment(self);
       }
     }
 
-    if (self->state == normalstate) {
+    if (get_state_environment(self) == normalstate) {
       if (!eval_in_environment(self, word)) {
         printf("Unknown word %s\n", word);
       }

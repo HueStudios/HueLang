@@ -40,3 +40,10 @@ void push_stack(Stack *self, void *data) {
   self->head = new_head;
   self->size++;
 }
+
+void *peek_stack(Stack *self) {
+  if (self->size == 0) {
+    return NULL;
+  }
+  return self->head->data;  
+}
