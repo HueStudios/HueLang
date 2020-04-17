@@ -44,6 +44,7 @@ void create_environment() {
   self->word_buffer = create_doublylinked();
   self->comment = 0;
   self->running = 1;
+  return self;
 }
 
 void execute_in_environment(Environment *self, char *word) {
