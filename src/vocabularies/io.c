@@ -8,15 +8,12 @@
 void _println (Environment *env) {
   if (env->value_stack->size > 0) {
     ArbitraryValue *val = pop_stack(env->value_stack);  
-    if ((val->type == stringtype) || (val->type == quotetype)) {
+    if ((val->type == stringtype) | (val->type == quotetype)) {
       printf("%s\n", val->value);
     } else {
-      printf("%d\n", *(int*)val->value);
+      printf("%d\n", *(long*)val->value);
     }
-    if (val->dynamic) {
-      free(val->value);
-      free(val);
-    }
+    cleanup_value(val);
   }
 }
 

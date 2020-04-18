@@ -68,25 +68,25 @@ void push_state_environment(Environment *self, EnvironmentState state) {
 }
 
 void execute_in_environment(Environment *self, char *word) {
-  push_stack(self->execution_stack, word);
+  ArbitraryValue *word_val = malloc(sizeof(ArbitraryValue));
+  word_val->value = word;
+  word_val->dynamic = 1;
+  word_val->type = symboltype;
+  push_stack(self->execution_stack, word_val);
   run_environment(self);
 }
 
-void execute_multiple_in_environment(Environment *self, DoublyLinkedList *words) {
-  for (LinkedListNode *focus = words->head; 
-      focus != NULL; focus = focus->next) {
-      ArbitraryValue *val = focus->value;
-      char *represented_word = val->value;
-      execute_in_environment(self, represented_word);
+unsigned char eval_in_environment(Environment *self, ArbitraryValue* word) {
+  if (word->type != symboltype) {
+    printf("Tried to evaluate a non-symbolic word!");
+    return 0;
   }
-}
 
-unsigned char eval_in_environment(Environment *self, char* word) {
   if (get_state_environment(self) == compilestate) {
     if (contains_key_dictionary(self->dictionaries[compiledictionary], 
-      word)) {
+      word->value)) {
       void (*word_function)(Environment*) 
-        = get_value_dictionary(self->dictionaries[compiledictionary], word);
+        = get_value_dictionary(self->dictionaries[compiledictionary], word->value);
       word_function(self);
       return 1;
     }
@@ -94,28 +94,27 @@ unsigned char eval_in_environment(Environment *self, char* word) {
 
   if (get_state_environment(self) == normalstate) {
     if (contains_key_dictionary(self->dictionaries[primarydictionary], 
-      word)) {
+      word->value)) {
       void (*word_function)(Environment*) 
-        = get_value_dictionary(self->dictionaries[primarydictionary], word);
+        = get_value_dictionary(self->dictionaries[primarydictionary], word->value);
       word_function(self);
       return 1;
     }
     else if (contains_key_dictionary(self->dictionaries[secondarydictionary], 
-      word)) {
-      printf("Running secondary word named %s\n", word);
+      word->value)) {
+      //printf("Running secondary word named %s\n", word->value);
       LinkedList *word_definition = 
-        get_value_dictionary(self->dictionaries[secondarydictionary], word);
-      printf("The word definition is at %p\n", word_definition);
+        get_value_dictionary(self->dictionaries[secondarydictionary], word->value);
+      //printf("The word definition is at %p\n", word_definition);
       for (LinkedListNode *focus = word_definition->head; 
         focus != NULL; focus = focus->next) {
         ArbitraryValue *val = focus->value;
-        char *represented_word = val->value;
-        printf("Pushing %s into the execution stack\n", represented_word);
-        push_stack(self->execution_stack, represented_word);
+        //printf("Pushing %s into the execution stack\n", val->value);
+        push_stack(self->execution_stack, val);
       }
       return 1;
     } else {
-      ArbitraryValue *value = token_to_whatever(word, 1);
+      ArbitraryValue *value = token_to_whatever(word->value, 1);
       if (value->type != symboltype) {
         push_stack(self->value_stack, value);
       } else {
@@ -130,10 +129,15 @@ unsigned char eval_in_environment(Environment *self, char* word) {
 
 void run_environment(Environment *self) {
   while(self->execution_stack->size != 0) {
-    char *word = pop_stack(self->execution_stack);
+    ArbitraryValue *word = pop_stack(self->execution_stack);
 
-    if (word[0] == '(') { self->comment++; return; }
-    if (word[0] == ')') { 
+    if (word->type != symboltype) {
+      printf("A non-symbol value reached the execution stack!");
+      return;
+    }
+
+    if (strcmp((char*)word->value, "(") == 0) { self->comment++; return; }
+    if (strcmp((char*)word->value, ")") == 0) { 
       self->comment--;
       if (self->comment < 0) {
         printf("Unbalanced comments.\n");
@@ -143,31 +147,27 @@ void run_environment(Environment *self) {
     if (self->comment > 0) return;
 
     if (get_state_environment(self) == compilestate) {
+      word->dynamic = 0;
       if (self->word_name == NULL) {
-        self->word_name = word;
+        self->word_name = word->value;
       } else if (!eval_in_environment(self, word)) {
-        ArbitraryValue *value = token_to_whatever(word, 0);
-        value->dynamic = 0;
-        printf("Added %s to the current secondary word\n", value->value);
-        preppend_linked(self->word_buffer, value);
+        preppend_linked(self->word_buffer, word);
       }      
     }
 
     if (get_state_environment(self) == hardcompilestate) {
-      ArbitraryValue *value = malloc(sizeof(ArbitraryValue));
-      value->value = token_to_symbol(word);
-      value->dynamic = 0;
-      value->type = symboltype;
-      preppend_linked(self->word_buffer, value);
-      if (strcmp(word, "end")) {
+      word->dynamic = 0;
+      preppend_linked(self->word_buffer, word);
+      if (strcmp((char*)word->value, "end") == 0) {
         pop_state_environment(self);
       }
     }
 
     if (get_state_environment(self) == normalstate) {
       if (!eval_in_environment(self, word)) {
-        printf("Unknown word %s\n", word);
+        printf("Unknown word %s\n", word->value);
       }
     }
+    cleanup_value(word);
   }
 }

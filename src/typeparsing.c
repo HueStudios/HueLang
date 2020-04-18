@@ -97,3 +97,10 @@ ArbitraryValue *token_to_whatever (char *token, unsigned char remove_quotes) {
   result->type = symboltype;
   return result; 
 }
+
+void cleanup_value(ArbitraryValue *self) {
+  if (self->dynamic) {
+      free(self->value);
+      free(self);
+    }
+}
