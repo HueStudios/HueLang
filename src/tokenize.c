@@ -50,6 +50,9 @@ char *read_token_from_filedesc(int fd, int *len) {
         }
         append_to_buffer(&buffer, focus, len);
     }
+    if (buffer == NULL) {
+        return NULL;
+    }
     append_to_buffer(&buffer, '\0', len);
     return buffer;
 }
