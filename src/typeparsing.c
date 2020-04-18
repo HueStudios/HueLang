@@ -12,6 +12,7 @@ typedef enum ValueType {
 typedef struct ArbitraryValue {
   ValueType type;
   void *value;
+  unsigned char dynamic;
 } ArbitraryValue;
 #endif 
 
@@ -81,6 +82,7 @@ char *token_to_symbol (char *token) {
 // HACK
 ArbitraryValue *token_to_whatever (char *token, unsigned char remove_quotes) {
   ArbitraryValue *result = malloc(sizeof(ArbitraryValue));
+  result->dynamic = 1;
   result->value = token_to_long(token);
   result->type = longtype;
   if (result->value != NULL) return result;

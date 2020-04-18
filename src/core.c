@@ -18,12 +18,13 @@ void _end_compile(Environment *env) {
     if (get_state_environment(env) != compilestate) {
         set_value_dictionary(env->dictionaries[secondarydictionary], env->word_name, 
             env->word_buffer);
+        printf("Compiled word named %s\n", env->word_name);
         env->word_name = NULL;
         env->word_buffer = create_linked();
     }
 }
 
-void register_core(Environment *env) {
+void register_core_words(Environment *env) {
     set_value_dictionary(env->dictionaries[primarydictionary], "def", _def);
     set_value_dictionary(env->dictionaries[compiledictionary], "def", _def_compile);
     set_value_dictionary(env->dictionaries[compiledictionary], "end", _end_compile);

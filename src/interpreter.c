@@ -2,6 +2,7 @@
 #include "tokenize.h"
 #include "environment.h"
 #include "core.h"
+#include "vocabularies/io.h"
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif 
@@ -11,7 +12,8 @@
 
 Environment *get_default_environment() {
     Environment *env = create_environment();
-    register_core(env);
+    register_core_words(env);
+    register_io_words(env);
     return env;
 }
 

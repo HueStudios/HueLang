@@ -102,10 +102,15 @@ unsigned char eval_in_environment(Environment *self, char* word) {
     }
     else if (contains_key_dictionary(self->dictionaries[secondarydictionary], 
       word)) {
-      for (LinkedListNode *focus = self->word_buffer->head; 
+      printf("Running secondary word named %s\n", word);
+      LinkedList *word_definition = 
+        get_value_dictionary(self->dictionaries[secondarydictionary], word);
+      printf("The word definition is at %p\n", word_definition);
+      for (LinkedListNode *focus = word_definition->head; 
         focus != NULL; focus = focus->next) {
         ArbitraryValue *val = focus->value;
         char *represented_word = val->value;
+        printf("Pushing %s into the execution stack\n", represented_word);
         push_stack(self->execution_stack, represented_word);
       }
       return 1;
@@ -142,6 +147,8 @@ void run_environment(Environment *self) {
         self->word_name = word;
       } else if (!eval_in_environment(self, word)) {
         ArbitraryValue *value = token_to_whatever(word, 0);
+        value->dynamic = 0;
+        printf("Added %s to the current secondary word\n", value->value);
         preppend_linked(self->word_buffer, value);
       }      
     }
@@ -149,6 +156,7 @@ void run_environment(Environment *self) {
     if (get_state_environment(self) == hardcompilestate) {
       ArbitraryValue *value = malloc(sizeof(ArbitraryValue));
       value->value = token_to_symbol(word);
+      value->dynamic = 0;
       value->type = symboltype;
       preppend_linked(self->word_buffer, value);
       if (strcmp(word, "end")) {

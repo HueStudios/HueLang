@@ -24,7 +24,7 @@ DoublyLinkedList *create_doublylinked() {
 
 void preppend_doublylinked(DoublyLinkedList *self, void *value) {
   DoublyLinkedListNode *toappend = malloc(sizeof(DoublyLinkedListNode));
-  toappend->value = toappend;
+  toappend->value = value;
   toappend->next = NULL;
 
   // Do relinking and stuff

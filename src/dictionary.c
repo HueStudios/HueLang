@@ -1,6 +1,7 @@
 #if INTERFACE
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 typedef struct Dictionary {
   DictionaryBin **bins;
   int bin_count;

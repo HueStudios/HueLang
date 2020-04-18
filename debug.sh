@@ -2,7 +2,7 @@ echo "<-> Cleaning up..."
 
 rm ./bin/Debug/*
 rm ./obj/Debug/*
-rm ./src/*.h
+find . -name "*.h" -type f -delete
 rm HueLang.make
 rm Makefile
 
