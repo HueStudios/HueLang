@@ -9,7 +9,7 @@ void _def(Environment *env) {
 }
 
 void _def_compile(Environment *env) {
-    prepend_linked(env->word_buffer, "def");
+    preppend_linked(env->word_buffer, "def");
     push_state_environment(env, hardcompilestate);
 }
 
