@@ -68,6 +68,7 @@ void push_state_environment(Environment *self, EnvironmentState state) {
 }
 
 void execute_in_environment(Environment *self, char *word) {
+  //printf("Executing %s\n", word);
   ArbitraryValue *word_val = malloc(sizeof(ArbitraryValue));
   word_val->value = word;
   word_val->dynamic = 1;
@@ -81,6 +82,8 @@ unsigned char eval_in_environment(Environment *self, ArbitraryValue* word) {
     printf("Tried to evaluate a non-symbolic word!");
     return 0;
   }
+
+  //printf("Evaluating word %s \n", word->value);
 
   if (get_state_environment(self) == compilestate) {
     if (contains_key_dictionary(self->dictionaries[compiledictionary], 
@@ -98,6 +101,7 @@ unsigned char eval_in_environment(Environment *self, ArbitraryValue* word) {
       void (*word_function)(Environment*) 
         = get_value_dictionary(self->dictionaries[primarydictionary], word->value);
       word_function(self);
+      //printf("Ran primary word %s\n", word->value);
       return 1;
     }
     else if (contains_key_dictionary(self->dictionaries[secondarydictionary], 
@@ -117,9 +121,11 @@ unsigned char eval_in_environment(Environment *self, ArbitraryValue* word) {
       ArbitraryValue *value = token_to_whatever(word->value, 1);
       if (value->type != symboltype) {
         push_stack(self->value_stack, value);
+        //printf("Added value to value stack\n");
       } else {
         free(value->value);
         free(value);
+        return 0;
       }
       return 1;
     }
@@ -128,11 +134,12 @@ unsigned char eval_in_environment(Environment *self, ArbitraryValue* word) {
 }
 
 void run_environment(Environment *self) {
+  //printf("Entered run mode\n");
   while(self->execution_stack->size != 0) {
     ArbitraryValue *word = pop_stack(self->execution_stack);
 
     if (word->type != symboltype) {
-      printf("A non-symbol value reached the execution stack!");
+      //printf("A non-symbol value (%s) reached the execution stack!\n", word->value);
       return;
     }
 
@@ -153,17 +160,13 @@ void run_environment(Environment *self) {
       } else if (!eval_in_environment(self, word)) {
         preppend_linked(self->word_buffer, word);
       }      
-    }
-
-    if (get_state_environment(self) == hardcompilestate) {
+    } else if (get_state_environment(self) == hardcompilestate) {
       word->dynamic = 0;
       preppend_linked(self->word_buffer, word);
       if (strcmp((char*)word->value, "end") == 0) {
         pop_state_environment(self);
       }
-    }
-
-    if (get_state_environment(self) == normalstate) {
+    } else if (get_state_environment(self) == normalstate) {
       if (!eval_in_environment(self, word)) {
         printf("Unknown word %s\n", word->value);
       }

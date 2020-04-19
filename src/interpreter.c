@@ -22,6 +22,7 @@ void repl() {
     while (1) {
         unsigned int len = 0;
         char *tok = read_token_from_filedesc(0,&len);
+        //printf("Read token %s \n", tok);
         if (len == 0) {
             break;
         }
