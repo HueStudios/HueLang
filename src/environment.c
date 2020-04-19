@@ -23,6 +23,7 @@ typedef struct Environment {
   Stack *value_stack;
   Stack *state_stack;
   Dictionary **dictionaries;
+  Dictionary *vocabularies;
   LinkedList *word_buffer;
   char *word_name;
   unsigned char running;
@@ -41,6 +42,7 @@ Environment *create_environment() {
   self->dictionaries[0] = create_dictionary();
   self->dictionaries[1] = create_dictionary();
   self->dictionaries[2] = create_dictionary();
+  self->vocabularies = create_dictionary();
   self->word_buffer = create_linked();
   self->comment = 0;
   self->running = 1;

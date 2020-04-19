@@ -7,7 +7,7 @@ project "HueLang"
    language "C"
    targetdir "bin/%{cfg.buildcfg}"
 
-   links {"m"}
+   links {"readline"}
 
    files { "**.h", "**.c" }
 
