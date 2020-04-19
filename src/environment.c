@@ -29,6 +29,10 @@ typedef struct Environment {
   unsigned char running;
   unsigned int comment;
 } Environment; 
+
+#define DEF ":"
+#define END ";"
+
 #endif
 
 #include "environment.h"
@@ -165,7 +169,7 @@ void run_environment(Environment *self) {
     } else if (get_state_environment(self) == hardcompilestate) {
       word->dynamic = 0;
       preppend_linked(self->word_buffer, word);
-      if (strcmp((char*)word->value, "end") == 0) {
+      if (strcmp((char*)word->value, END) == 0) {
         pop_state_environment(self);
       }
     } else if (get_state_environment(self) == normalstate) {

@@ -12,7 +12,7 @@ void _def(Environment *env) {
 void _def_compile(Environment *env) {
   //printf("Entered hard compile\n");
   ArbitraryValue *def_val = malloc(sizeof(ArbitraryValue));
-  def_val->value = "def";
+  def_val->value = DEF;
   def_val->dynamic = 0;
   def_val->type = symboltype;
   preppend_linked(env->word_buffer, def_val);
@@ -47,7 +47,7 @@ void _use(Environment *env) {
 
 void register_core_words(Environment *env) {
   set_value_dictionary(env->dictionaries[primarydictionary], "use", _use);
-  set_value_dictionary(env->dictionaries[primarydictionary], "def", _def);
-  set_value_dictionary(env->dictionaries[compiledictionary], "def", _def_compile);
-  set_value_dictionary(env->dictionaries[compiledictionary], "end", _end_compile);
+  set_value_dictionary(env->dictionaries[primarydictionary], DEF, _def);
+  set_value_dictionary(env->dictionaries[compiledictionary], DEF, _def_compile);
+  set_value_dictionary(env->dictionaries[compiledictionary], END, _end_compile);
 }
