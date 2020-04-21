@@ -5,5 +5,5 @@
 #include "main.h"
 
 void main(char **args) {
-    repl();
+  repl();
 }
