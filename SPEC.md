@@ -38,7 +38,7 @@ The execution stack is used by the runtime to hold the words to be evaluated. Wh
 
 #### Value stack
 
-When a word evaluates to a value (For example how the word ``20`` could evaluate to the integer 20), it is pushed to the value stack. Primary words may then pop values from the value stack, operate on them, and optionally pushing a result back.
+When a word evaluates to a value (For example how the word ``20`` could evaluate to the integer 20), it is pushed to the value stack. Primary words may then pop values from the value stack, operate on them, and optionally push a result back.
 
 ### Compilation
 
