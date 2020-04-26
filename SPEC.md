@@ -14,7 +14,9 @@ By following these principles, HueLang aims to be a possible replacement for a l
 
 ### Words
 
-The main concept of HueLang is that of the ``word``: a string of characters that may or may not have a definition at a given point in time. Everything in HueLang starts as a ``word``: it is the linguistic interface between the programmer and the runtime environment of HueLang. 
+The main concept of HueLang is that of the ``word``: a symbol that may or may not have a definition at a given point in time. Everything in HueLang starts as a ``word``: it is the linguistic interface between the programmer and the runtime environment of HueLang. 
+
+Note that the concept of word is more general than that of a textual representation. Words could be images, sounds, or any manifestation in some other medium that can be used to represent symbols. However, this document will focus in words represented as a string of characters. Further generalization can hopefully be infered, and research into a non-textual implementation of HueLang is certainly something to aim for in the future.
 
 When a word is evaluated, its definition is utilized as an instruction or set of instructions for the runtime environment to execute. For example, the word ``20`` could be evaluated as the numerical value ``20``, and instruct the environment to create an integer memory section to hold this value so that it can be used in further operations. However same word ``20`` could later be redefined to something else entirely, making it so that, for example when evaluated, it would save a certain file to disk.
 
