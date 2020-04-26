@@ -61,3 +61,15 @@ The ``:`` word sets the environment into a special state called "compilation sta
 The definition of a secondary word may contain further usages of ``:`` and ``;``, implying that the word being defined will compile other words when evaluated. 
 
 The compilation process finishes when the number of ``;`` word in the sequence is equal to the number of ``:`` words. When this happens, the compilation state is disabled, and the buffer is saved as the definition of the word.
+
+### Forced evaluation
+
+The runtime environment performs a multitude of tasks whenever a word on the execution stack must be evaluated. However, under some circumstances it may be desired for the runtime to evaluate a word without any such formalities. When this is done, it is said that the word is "forcibly evaluated".
+
+### Word resolution
+
+Word resolution is the process through which a word is resolved to its definition. Right before a word is evaluated, the word ``preprocess`` is forcibly evaluated first (Note that ``preprocess`` since is not added to the execution stack for this evaluation, it is instead resolved and evaluated directly. Therefore, ``preprocess`` can not preprocess itself or any other forcibly evaluated words). The definition of this word may then alter in-place the word that is to be evaluated. Redefining the ``preprocess`` word allows the user to change the word that was to be evaluated, replacing it with something else. 
+
+After the pre-processing stage, the runtime environment attempts to resolve the word by looking up the definition table. The definition table is a key-value data structure that resolves a word to its primary or secondary definition. If a definition is found on the definition table, this definition is used and the word resolution process ends. If no definition is found, the word ``defaultresolve`` is forcibly evaluated. Redefining ``defaultresolve`` allows the user to create non-exhaustive word definitions. For example, ``defaultresolve`` could look for words with numeric formats and perform the work required to add them to the the value stack. If ``defaultresolve`` successfully resolved a word, it must raise a ``resolved`` flag for the runtime to be aware of this fact. 
+
+When a word couldn't be resolved either by looking up its definition or through a non-exhaustive method, The runtime environment sets its error message to ``"Unknown word"`` and the word ``handleerror`` is forcibly evaluated.
