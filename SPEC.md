@@ -26,4 +26,20 @@ Primary definitions are those whose implementation is written in the host langua
 
 Secondary definitions are simply those composed as an ordered set of other words. The specifics of this are further explained with the concept of compilation, seen below.
 
+### Stacks
+
+Being a stack-based languaged, it follows that stacks are a key part of HueLang. A stack is a data structure that allows the storage and retrieval of data, following a _last in, first out_ order. 
+
+The HueLang runtime is composed of two stacks: execution and value.
+
+#### Execution stack
+
+The execution stack is used by the runtime to hold the words to be evaluated. When a word with a secondary definition is evaluated, the word is said to be "expanded" into its component words, and these are pushed to the execution stack. 
+
+#### Value stack
+
+When a word evaluates to a value (For example how the word ``20`` could evaluate to the integer 20), it is pushed to the value stack. Primary words may then pop values from the value stack, operate on them, and optionally pushing a result back.
+
 ### Compilation
+
+Compilation
