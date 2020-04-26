@@ -18,7 +18,7 @@ The main concept of HueLang is that of the ``word``: a string of characters that
 
 When a word is evaluated, its definition is utilized as an instruction or set of instructions for the runtime environment to execute. For example, the word ``20`` could be evaluated as the numerical value ``20``, and instruct the environment to create an integer memory section to hold this value so that it can be used in further operations. However same word ``20`` could later be redefined to something else entirely, making it so that, for example when evaluated, it would save a certain file to disk.
 
-#### Definition types
+#### Definitions
 
 Regarding the definitions of words, there are primary and secondary definitions:
 
@@ -42,4 +42,22 @@ When a word evaluates to a value (For example how the word ``20`` could evaluate
 
 ### Compilation
 
-Compilation
+Compilation is the process through which new secondary words are defined by the programmer. By default, this is done by evaluating a sequence of words like the following:
+
+```
+: [word_name] [component_words ...] ;
+```
+
+For example:
+
+```
+: sayhue "Hue" println ;
+```
+
+The built-in words for compilation are ``:`` and ``;``, but it must be noted that these words can and may be redefined by the user for a particular purpose. As such, the user should avoid redefining said words unless the intention is to modify the compilation process in some way. 
+
+The ``:`` word sets the environment into a special state called "compilation state". In this state, the first word after the ``:`` is directly interpreted as the name of the word to be defined or re-defined. Further words are not evaluated to their definition, but are instead added to a buffer. As an exception, the user can define a word with a name such as ``[word_name]_compile``. This will make it so that when ``[word_name]`` is evaluated in compile mode, it it is evaluated to the definition of ``[word_name]_compile``. 
+
+The definition of a secondary word may contain further usages of ``:`` and ``;``, implying that the word being defined will compile other words when evaluated. 
+
+The compilation process finishes when the number of ``;`` word in the sequence is equal to the number of ``:`` words. When this happens, the compilation state is disabled, and the buffer is saved as the definition of the word.
