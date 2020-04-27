@@ -18,7 +18,7 @@ The main concept of HueLang is that of the ``word``: a symbol that may or may no
 
 Note that the concept of word is more general than that of a textual representation. Words could be images, sounds, or any manifestation in some other medium that can be used to represent symbols. However, this document will focus in words represented as a string of characters. Further generalization can hopefully be infered, and research into a non-textual implementation of HueLang is certainly something to aim for in the future.
 
-When a word is evaluated, its definition is utilized as an instruction or set of instructions for the runtime environment to execute. For example, the word ``20`` could be evaluated as the numerical value ``20``, and instruct the environment to create an integer memory section to hold this value so that it can be used in further operations. However same word ``20`` could later be redefined to something else entirely, making it so that, for example when evaluated, it would save a certain file to disk.
+When a word is evaluated, its definition is utilized as an instruction or set of instructions for the runtime environment to execute. For example, the word ``20`` could be evaluated as the numerical value ``20``, and instruct the environment to create an integer memory section to hold this value so that it can be used in further operations. However, the same word ``20`` could later be redefined to something else entirely, making it so that, for example when evaluated, it would save a certain file to disk.
 
 #### Definitions
 
@@ -70,8 +70,20 @@ The runtime environment performs a multitude of tasks whenever a word on the exe
 
 ### Word resolution
 
-Word resolution is the process through which a word is resolved to its definition. Right before a word is evaluated, the word ``preprocess`` is forcibly evaluated first (Note that since ``preprocess`` is forcibly evaluated, it is not added to the execution stack for this evaluation, it is instead resolved and evaluated directly. Therefore, ``preprocess`` can not preprocess itself or any other forcibly evaluated words). The definition of this word may then alter in-place the word that is to be evaluated. Redefining the ``preprocess`` word allows the user to change the word that was to be evaluated, replacing it with something else. 
+Word resolution is the process through which a word is resolved to its definition. Right before a word is evaluated, the word ``!preprocess`` is forcibly evaluated first (Note that since ``!preprocess`` is forcibly evaluated, it is not added to the execution stack for this evaluation, it is instead resolved and evaluated directly. Therefore, ``!preprocess`` can not preprocess itself or any other forcibly evaluated words). The definition of this word may then alter in-place the word that is to be evaluated. Redefining the ``!preprocess`` word allows the user to change the word that was to be evaluated, replacing it with something else. 
 
-After the pre-processing stage, the runtime environment attempts to resolve the word by looking up the definition table. The definition table is a key-value data structure that resolves a word to its primary or secondary definition. If a definition is found on the definition table, this definition is used and the word resolution process ends. If no definition is found, the word ``defaultresolve`` is forcibly evaluated. Redefining ``defaultresolve`` allows the user to create non-exhaustive word definitions. For example, ``defaultresolve`` could look for words with numeric formats and perform the work required to add them to the the value stack. If ``defaultresolve`` successfully resolved a word, it must raise a ``resolved`` flag for the runtime to be aware of this fact. 
+After the pre-processing stage, the runtime environment attempts to resolve the word by looking up the definition table. The definition table is a key-value data structure that resolves a word to its primary or secondary definition. If a definition is found on the definition table, this definition is used and the word resolution process ends. If no definition is found, the word ``!defaultresolve`` is forcibly evaluated. Redefining ``!defaultresolve`` allows the user to create non-exhaustive word definitions. For example, ``!defaultresolve`` could look for words with numeric formats and perform the work required to add them to the the value stack. If ``!defaultresolve`` successfully resolved a word, it must raise a ``resolved`` flag for the runtime to be aware of this fact. 
 
 When a word couldn't be resolved either by looking up its definition or through a non-exhaustive method, The runtime environment sets its error message to ``"Unknown word"`` and the word ``handleerror`` is forcibly evaluated.
+
+### Word literals
+
+Under some circumstances it is useful to refer to a word as a value, instead of as its definition. This can be achieved through the use of quotations and word literals. 
+
+By default, ``!defaultresolve`` shall be defined in such a way that it looks for words such as ``:[token]``. When it finds one, it adds the ``[token]`` as a word literal to the value stack. The ``:`` is called "quote" in this context.
+
+### Vocabularies
+
+Vocabularies are extensions to HueLang that may be invoked at any moment during runtime. This can be done by evaluating a sequence like ``:[vocabulary_name] #use``. When ``#use`` is evaluated, the vocabulary ``[vocabulary_name]`` is initialized, at which point it may alter any part of the runtime environment. This means it may define words, add new behaviour, and pretty much anything else.
+
+It is up to the implementation to inform the user of the available vocabularies as well as the specifics of them, so long as they provide enough freedom and expandability to the language as possible.
