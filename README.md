@@ -17,4 +17,4 @@ This project is heavily inspired by [nexustix](https://github.com/nexustix/recon
 
 ## Nerd stuff
 
-You can read the [language document]() to learn how the thing works, how to make an implementation of the thing, and maybe even how to write code for the thing.
+You can read the [language document](https://github.com/HueStudios/HueLang/blob/master/docs/language.md) to learn how the thing works, how to make an implementation of the thing, and maybe even how to write code for the thing.
