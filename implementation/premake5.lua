@@ -3,18 +3,8 @@ workspace "HueLang"
    configurations { "Debug", "Release" }
 
 project "HueLang"
-   kind "ConsoleApp"
+   kind "SharedLib"
    language "C"
-   targetdir "bin/%{cfg.buildcfg}"
+   targetdir "lib/libhuelang"
 
-   links {"readline"}
-
-   files { "**.h", "**.c" }
-
-   filter "configurations:Debug"
-      defines { "DEBUG" }
-      symbols "On"
-
-   filter "configurations:Release"
-      defines { "NDEBUG" }
-      optimize "On"
+   files { "libhuelang/src/**.h", "libhuelang/src/**.c" }

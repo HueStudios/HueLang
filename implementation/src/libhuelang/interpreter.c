@@ -2,9 +2,6 @@
 #include "tokenize.h"
 #include "environment.h"
 #include "core.h"
-#include "vocabularies/io.h"
-#include "vocabularies/arithmetic.h"
-#include "vocabularies/flow.h"
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif 
@@ -15,9 +12,6 @@
 Environment *get_default_environment() {
   Environment *env = create_environment();
   register_core_words(env);
-  set_value_dictionary(env->vocabularies, "io", register_io_words);
-  set_value_dictionary(env->vocabularies, "arithmetic", register_arithmetic_words);
-  set_value_dictionary(env->vocabularies, "flow", register_flow_words);
   return env;
 }
 

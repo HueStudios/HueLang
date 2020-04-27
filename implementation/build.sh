@@ -7,14 +7,14 @@ rm HueLang.make
 rm Makefile
 
 echo "<-> Making headers..."
-for file in $(find ./src/ -name "*.[ch]")
+for file in $(find ./ -name "*.[ch]")
 do
   makeheaders $file
   echo "<!> Headers for" $file "made"
 done
 
 echo "<-> Adding header guards..."
-for file in $(find ./src/ -name "*.[h]")
+for file in $(find ./ -name "*.[h]")
 do
   fbname=$(basename "$file" .h)
   upper=${fbname^^}
@@ -22,10 +22,19 @@ do
   echo "<!> Headers guards for" $file "made"
 done
 
+rm -rf headers
+
+mkdir headers
+mkdir headers/libhuelang
+cp src/libhuelang/*.h headers/libhuelang
+
 echo "<-> Running premake..."
 premake5 gmake2
 echo "<-> Running make..."
-make
-echo "<-> Starting program..."
-./bin/Debug/HueLang
+if [[ $1 == "" ]]
+then
+  make
+else
+  make config=$1  
+fi
 echo "<-> Done!"

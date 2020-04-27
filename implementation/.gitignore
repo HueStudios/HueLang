@@ -3,8 +3,9 @@
 
 bin/*
 obj/*
+lib/*
 .vscode/
-
+headers/*
 
 Makefile
 *.h
