@@ -14,6 +14,8 @@ By following these principles, HueLang aims to be a possible replacement for a l
 
 ### Words
 
+_"In the beginning were the words and the words made the world. I am the words. The words are everything. Where the words end the world ends. You cannot go forward in the absence of space." - The Talos Principle_
+
 The main concept of HueLang is that of the ``word``: a symbol that may or may not have a definition at a given point in time. Everything in HueLang starts as a ``word``: it is the linguistic interface between the programmer and the runtime environment of HueLang. 
 
 Note that the concept of word is more general than that of a textual representation. Words could be images, sounds, or any manifestation in some other medium that can be used to represent symbols. However, this document will focus in words represented as a string of characters. Further generalization can hopefully be infered, and research into a non-textual implementation of HueLang is certainly something to aim for in the future.
