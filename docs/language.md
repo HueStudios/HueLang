@@ -34,11 +34,15 @@ Secondary definitions are simply those composed as an ordered set of other words
 
 Being a stack-based languaged, it follows that stacks are a key part of HueLang. A stack is a data structure that allows the storage and retrieval of data, following a _last in, first out_ order. 
 
-The HueLang runtime is composed of two stacks: execution and value.
+The HueLang runtime is composed of three stacks: execution, error and value.
 
-#### Execution stack
+### Execution stack
 
 The execution stack is used by the runtime to hold the words to be evaluated. When a word with a secondary definition is evaluated, the word is said to be "expanded" into its component words, and these are pushed to the execution stack. 
+
+### Error stack
+
+When an error occurs during the execution, a word representative of this error is added to the error stack. Note that this word does not need any sort of definition, and in this context it is only used as a symbol.
 
 #### Value stack
 
@@ -76,7 +80,7 @@ Word resolution is the process through which a word is resolved to its definitio
 
 After the pre-processing stage, the runtime environment attempts to resolve the word by looking up the definition table. The definition table is a key-value data structure that resolves a word to its primary or secondary definition. If a definition is found on the definition table, this definition is used and the word resolution process ends. If no definition is found, the word ``!defaultresolve`` is forcibly evaluated. Redefining ``!defaultresolve`` allows the user to create non-exhaustive word definitions. For example, ``!defaultresolve`` could look for words with numeric formats and perform the work required to add them to the the value stack. If ``!defaultresolve`` successfully resolved a word, it must raise a ``resolved`` flag for the runtime to be aware of this fact. 
 
-When a word couldn't be resolved either by looking up its definition or through a non-exhaustive method, The runtime environment sets its error message to ``"Unknown word"`` and the word ``handleerror`` is forcibly evaluated.
+When a word couldn't be resolved either by looking up its definition or through a non-exhaustive method, The runtime environment pushes ``"unknown_word`` to the error stack and the word ``handleerror`` is forcibly evaluated.
 
 ### Word literals
 
@@ -89,3 +93,13 @@ By default, ``!defaultresolve`` shall be defined in such a way that it looks for
 Vocabularies are extensions to HueLang that may be invoked at any moment during runtime. This can be done by evaluating a sequence like ``:[vocabulary_name] #use``. When ``#use`` is evaluated, the vocabulary ``[vocabulary_name]`` is initialized, at which point it may alter any part of the runtime environment. This means it may define words, add new behaviour, and pretty much anything else.
 
 It is up to the implementation to inform the user of the available vocabularies as well as the specifics of them, so long as they provide enough freedom and expandability to the language as possible.
+
+## Runtime environment structure
+
+Having looked at the concepts that HueLang revolves around, let us now look at the specific composition of a HueLang runtime environment.
+
+- Definition table: ``(word->definition)`` key-value pairs. The definition may be either a finite ordered set of words or a function written in the host language.
+- Mode table: ``(word->integer)`` key-value pairs. This is used to set/unset modes and flags like ``compile`` or ``resolved`` and other modes or flags added by vocabularies. This should NOT be used for general-purpose memory, but only for the runtime environment to keep track of its state. 
+- Error stack: ``(word)`` a stack of words that keeps track of errors that occured during execution or while handling other errors. 
+- Value stack: ``(value)`` the stack that cointains values to be used by the rest of the environment.
+- Execution stack: ``(word)`` a stack of words that keeps that of the execution and expansion of secondary definitions. 
