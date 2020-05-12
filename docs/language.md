@@ -103,3 +103,4 @@ Having looked at the concepts that HueLang revolves around, let us now look at t
 - Error stack: ``(word)`` a stack of words that keeps track of errors that occured during execution or while handling other errors. 
 - Value stack: ``(value)`` the stack that cointains values to be used by the rest of the environment.
 - Execution stack: ``(word)`` a stack of words that keeps that of the execution and expansion of secondary definitions. 
+- Compilation buffer: ``(word)`` an ordered set of words to which keeps track of the secondary definition that is being compiled.
