@@ -57,6 +57,17 @@ unsigned long long String_HashForTable (char *str) {
   return 1;
 }
 
+//cSet the definition of a word.
+void DefinitionTable_SetDefinition(DefinitionTable *self, Word word, 
+  Definition definition) {
+  self->buckets[word.major].entries[word.minor].definition = definition;
+}
+
+// Get the definition of a word. 
+Definition DefinitionTable_GetDefinition(DefinitionTable *self, Word word) {
+  return self->buckets[word.major].entries[word.minor].definition;
+}
+
 // Convert a token to a word. Also registers the word when needed.
 Word DefinitionTable_TokToWord(DefinitionTable *self, 
   char *token) {
