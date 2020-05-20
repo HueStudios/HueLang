@@ -52,8 +52,13 @@ DefinitionTable *DefinitionTable_Create() {
 
 // Compute the hash of a string to be used on a hashtable.
 unsigned long long String_HashForTable (char *str) {
-  // TODO
-  return 1;
+  unsigned long hash = 5381;
+  int c;
+
+  while (c = *str++)
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+  return hash;
 }
 
 // Set the definition of a word.
