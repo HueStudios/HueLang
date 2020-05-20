@@ -35,8 +35,6 @@ typedef struct DefinitionTableBucket {
 
 #endif
 
-// TODO: make the default definition type be :undefined.
-
 #include "definition.h"
 
 // Create a definition table and return a pointer to it.
@@ -97,5 +95,14 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   bucket.entries[bucket.size].name = malloc(sizeof(char) * (strlen(token) + 1));
   strcpy(bucket.entries[bucket.size].name, token);
   result.minor = bucket.size;
+
+  // Set the default definition of the word to none.
+  if (strcmp(token,"undefined") != 0) {
+    Definition defaultdef;
+    defaultdef.value.number = 0;
+    defaultdef.type = DefinitionTable_TokToWord(self, "undefined");
+    bucket.entries[bucket.size].definition = defaultdef;
+  }
+
   return result;
 }
