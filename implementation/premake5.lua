@@ -7,4 +7,4 @@ project "HueLang"
    language "C"
    targetdir "lib/libhuelang"
 
-   files { "libhuelang/src/**.h", "libhuelang/src/**.c" }
+   files { "src/libhuelang/**.h", "src/libhuelang/**.c" }

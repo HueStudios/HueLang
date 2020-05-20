@@ -1,4 +1,5 @@
 #if INTERFACE
+typedef struct Environment Environment;
 #include "environment.h"
 #define ATOMTYPEDEFWORD "atomtypedef"
 #endif

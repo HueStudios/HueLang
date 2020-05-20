@@ -1,8 +1,8 @@
 #if INTERFACE
 
 #include <string.h>
+#include <stdlib.h>
 #include "secondarydef.h"
-#include "environment.h"
 #include "word.h"
 
 #define INITIAL_DEF_BUCKET_SIZE 2
@@ -35,6 +35,8 @@ typedef struct DefinitionTableBucket {
 
 #endif
 
+// TODO: make the default definition type be :undefined.
+
 #include "definition.h"
 
 // Create a definition table and return a pointer to it.
@@ -45,8 +47,7 @@ DefinitionTable *DefinitionTable_Create() {
     self->buckets[i].max_size = 2;
     self->buckets[i].size = 0;
     self->buckets[i].entries 
-      = malloc(sizeof(DefinitionTableEntry) 
-                * INITIAL_DEF_BUCKET_SIZE);
+      = calloc(INITIAL_DEF_BUCKET_SIZE,sizeof(DefinitionTableEntry));
   }
   return self;
 }
@@ -57,7 +58,7 @@ unsigned long long String_HashForTable (char *str) {
   return 1;
 }
 
-//cSet the definition of a word.
+// Set the definition of a word.
 void DefinitionTable_SetDefinition(DefinitionTable *self, Word word, 
   Definition definition) {
   self->buckets[word.major].entries[word.minor].definition = definition;
@@ -93,7 +94,8 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
     bucket.entries = realloc(bucket.entries, bucket.max_size);
   }
   bucket.size += 1;
-  bucket.entries[bucket.size].name = strcpy(token);
+  bucket.entries[bucket.size].name = malloc(sizeof(char) * (strlen(token) + 1));
+  strcpy(bucket.entries[bucket.size].name, token);
   result.minor = bucket.size;
   return result;
 }
