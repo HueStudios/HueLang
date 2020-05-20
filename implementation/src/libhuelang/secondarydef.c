@@ -1,19 +1,21 @@
 #if INTERFACE
 
+#include "word.h"
+
 typedef struct SecondaryDefinition {
-  word *data;
+  Word *data;
   int size;
 } SecondaryDefinition;
 
 typedef struct SecondaryDefinitionBuffer {
-  SecondaryDefinitonBufferNode *head;
+  SecondaryDefinitionBufferNode *head;
   unsigned int size;
-}
+} SecondaryDefinitionBuffer;
 
 typedef struct SecondaryDefinitionBufferNode {
-  word value;
+  Word value;
   SecondaryDefinitionBuffer *next;
-}
+} SecondaryDefinitionBufferNode;
 
 #endif
 
