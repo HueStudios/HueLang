@@ -2,7 +2,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "secondarydef.h"
 #include "word.h"
 
 #define INITIAL_DEF_BUCKET_SIZE 2

@@ -32,8 +32,8 @@ premake5 gmake2
 echo "<-> Running make..."
 if [[ $1 == "" ]]
 then
-  make
+  time make
 else
-  make config=$1  
+  time make config=$1  
 fi
 echo "<-> Done!"
