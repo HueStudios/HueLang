@@ -6,6 +6,7 @@
 
 #define INITIAL_DEF_BUCKET_SIZE 2
 #define DEF_BUCKET_COUNT 0xFFF
+#define UNDEFINEDWORD "undefined"
 
 typedef union DefinitionValue {
   void *pointer;
@@ -101,10 +102,10 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   result.minor = bucket.size;
 
   // Set the default definition of the word to none.
-  if (strcmp(token,"undefined") != 0) {
+  if (strcmp(token, UNDEFINEDWORD) != 0) {
     Definition defaultdef;
     defaultdef.value.number = 0;
-    defaultdef.type = DefinitionTable_TokToWord(self, "undefined");
+    defaultdef.type = DefinitionTable_TokToWord(self, UNDEFINEDWORD);
     bucket.entries[bucket.size].definition = defaultdef;
   }
 

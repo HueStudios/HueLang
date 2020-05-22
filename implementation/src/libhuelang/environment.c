@@ -5,6 +5,7 @@
 #include "type.h"
 
 #define PREPROCESSWORD "!preprocess"
+#define DEFAULTRESOLVEWORD "!defaultresolve"
 
 typedef struct ExecutionStackNode {
   Word value;
@@ -78,6 +79,24 @@ void Environment_Run(Environment *self) {
     Word preprocessword = DefinitionTable_TokToWord(self->definition_table, PREPROCESSWORD);
     Environment_PushExecution(self,preprocessword);
     Environment_ForciblyEvaluate(self);
+    // Get the word
+    Word word = Environment_PeekExecution(self);
+    // Obtain the definition of the word.
+    Definition worddef = DefinitionTable_GetDefinition(self->definition_table, word);
+    // Obtain the type of the definition
+    Word definitiontype = worddef.type;
+    // Verify if the word has a definition.
+    Word undefinedword = DefinitionTable_TokToWord(self->definition_table, UNDEFINEDWORD);
+    if ((definitiontype.major==undefinedword.major)&
+      (definitiontype.minor==undefinedword.minor)) {
+      // Evaluate default resolution.
+      Word defaultresolveword = DefinitionTable_TokToWord(self->definition_table, DEFAULTRESOLVEWORD);
+      Environment_PushExecution(self,defaultresolveword);
+      Environment_ForciblyEvaluate(self);
+    } else {
+      // Evaluate the word itself.
+      Environment_ForciblyEvaluate(self);
+    }
   }
 }
 
