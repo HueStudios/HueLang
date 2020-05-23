@@ -18,13 +18,11 @@ void Tokens_AppendToBuffer (unsigned char **buffer, char to_add, int *len) {
 }
 
 // Read a single token from a file descriptor
-char *Tokens_ReadTokFromFDesc(int fd, int *len) {
+unsigned char *Tokens_ReadTokFromFDesc(int fd, int *len) {
     unsigned char focus = 0;
-    unsigned char prev_focus = 0;
     *len = 0;
     unsigned char *buffer = NULL;
     while (1) {
-        prev_focus = focus;
         unsigned int bytes_read = read(fd, &focus, 1);
         if (bytes_read == 0) {
             break;
