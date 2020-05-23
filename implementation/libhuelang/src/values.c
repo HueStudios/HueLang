@@ -1,6 +1,7 @@
 #if INTERFACE
 
 #include <stdlib.h>
+#include "type.h"
 
 typedef struct ValueStack {
   unsigned long pointer;
@@ -20,4 +21,21 @@ ValueStack *ValueStack_Create() {
   self->size = INITIALVALUESTACKSIZE;
   self->data = malloc(sizeof(char) * self->size);
   return self;
+}
+
+void *ValueStack_GetAbsolutePointer(ValueStack *self) {
+  void *new = self->data + self->pointer;
+  return new;
+}
+
+void *ValueStack_PushAlloc(ValueStack *self, unsigned int size) {
+  void *result = ValueStack_GetAbsolutePointer(self);
+  self->pointer += size;
+  return result;
+}
+
+// TODO this
+Word *ValueStack_Pop(ValueStack *self) {
+  self->pointer -= sizeof(Word);
+  return self->pointer;
 }
