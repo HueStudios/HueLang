@@ -34,8 +34,10 @@ void *ValueStack_PushAlloc(ValueStack *self, unsigned int size) {
   return result;
 }
 
-// TODO this
-Word *ValueStack_Pop(ValueStack *self) {
+Word *ValueStack_Pop(ValueStack *self, Environment *env) {
   self->pointer -= sizeof(Word);
-  return self->pointer;
+  Word *result = ValueStack_GetAbsolutePointer(self);
+  int size = Types_ResolveTypeSize(env, result);
+  self->pointer -= size;
+  return result;
 }
