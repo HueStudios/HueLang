@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include "definition.h"
 #include "type.h"
+#include "core.h"
 
 #define PREPROCESSWORD "!preprocess"
 #define DEFAULTRESOLVEWORD "!defaultresolve"
+#define PRIMARYDEFINITIONWORD "primary"
 
 typedef struct ExecutionStackNode {
   Word value;
@@ -27,9 +29,8 @@ Environment *Environment_Create() {
   Environment *self = malloc(sizeof(Environment));
   self->definition_table = DefinitionTable_Create();
 
-  // This is the best piece of code I've written in my life.
-  Word wordword = DefinitionTable_TokToWord(self->definition_table, "word");
-  Types_RegisterAtomicType(self, wordword, sizeof(Word));
+  Core_Initialize(self);
+
   return self;
 }
 
@@ -57,20 +58,11 @@ Word Environment_PeekExecution(Environment *self) {
 
 // Forcibly evaluate a word in this environment.
 void Environment_ForciblyEvaluate(Environment *self) {
-  Word word = Environment_PeekExecution(self);
-  // Obtain the definition of the word.
-  Definition worddef = DefinitionTable_GetDefinition(self->definition_table, word);
-  // Obtain the type of the definition
-  Word definitiontype = worddef.type;
-  Definition definitiontypede = DefinitionTable_GetDefinition(self->definition_table, definitiontype);
-  // Verify if the type definition is primary
-  Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, "primary");
-  if ((definitiontypede.type.major == primarydefinitiontype.major) & 
-    (definitiontypede.type.minor == primarydefinitiontype.minor)) {
-    // Call the definition handler.
-    void (*defhandler)(Environment*) = definitiontypede.value.pointer;
-    defhandler(self);
-  }
+  Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+  Definition primarydefinition = DefinitionTable_GetDefinition(self->definition_table, primarydefinitiontype);
+  // Call the primary definition handler.
+  void (*defhandler)(Environment*) = primarydefinition.value.pointer;
+  defhandler(self);
 } 
 
 // Enter the execution loop.
