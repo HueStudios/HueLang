@@ -11,7 +11,7 @@ typedef struct Environment Environment;
 
 void __primary(Environment *env) {
   if (env->execution_stack == NULL) return;
-  Word word = Environment_PopExecution(env);
+  Word word = Environment_PeekExecution(env);
   // Obtain the definition of the word.
   Definition worddef = DefinitionTable_GetDefinition(env->definition_table, word);
   // Obtain the type of the definition
@@ -21,6 +21,7 @@ void __primary(Environment *env) {
     (primarydefinitiontype.minor == definitiontype.minor)) {
     void (*defhandler)(Environment*) = worddef.value.pointer;
     defhandler(env);
+    Environment_PopExecution(env);
     return;
   }
   Definition definitiontypede = DefinitionTable_GetDefinition(env->definition_table, definitiontype);
@@ -30,6 +31,7 @@ void __primary(Environment *env) {
     // Call the primary definition handler.
     void (*defhandler)(Environment*) = definitiontypede.value.pointer;
     defhandler(env);
+    Environment_PopExecution(env);
     return;
   }
 }

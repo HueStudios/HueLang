@@ -78,10 +78,6 @@ void Environment_ForciblyEvaluate(Environment *self) {
 // Enter the execution loop.
 void Environment_Run(Environment *self) {
   while (self->execution_stack != NULL) {
-    // Evaluate preprocess 
-    Word preprocessword = DefinitionTable_TokToWord(self->definition_table, PREPROCESSWORD);
-    Environment_PushExecution(self,preprocessword);
-    Environment_ForciblyEvaluate(self);
     // Evaluate it
     Environment_ForciblyEvaluate(self);
   }
