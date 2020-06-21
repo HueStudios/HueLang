@@ -28,9 +28,18 @@ void *ValueStack_GetAbsolutePointer(ValueStack *self) {
   return new;
 }
 
+void ValueStack_ResolveStackGrowth(ValueStack *self) {
+  if (self->pointer <= self->size) {
+    self->size *= 2;
+    ValueStack_ResolveStackGrowth(self);
+  }
+}
+
 void *ValueStack_PushAlloc(ValueStack *self, unsigned int size) {
   void *result = ValueStack_GetAbsolutePointer(self);
   self->pointer += size;
+  ValueStack_ResolveStackGrowth(self);
+  self->data = realloc(self->data, self->size);
   return result;
 }
 

@@ -7,15 +7,8 @@
 
 #include "repl.h"
 
-
-void __test(Environment *env) {
-  printf("HELLO WORLD\n");
-}
-
 void Repl_Start() {
   Environment *env = Environment_Create();
-  Word testword = DefinitionTable_TokToWord(env->definition_table, "test");
-  Environment_AddPrimaryDefinition(env, testword, &__test);
   while (1) {
     unsigned int len = 0;
     char *tok = Tokens_ReadTokFromFDesc(0,&len);
