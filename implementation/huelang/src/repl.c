@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include "environment.h"
 #include "tokenize.h"
+#include <signal.h>
 #endif
 
 #include "repl.h"
 
 
 void __test(Environment *env) {
-  printf("HELLO WOLD");
+  printf("HELLO WOLD\n");
 }
 
 void Repl_Start() {

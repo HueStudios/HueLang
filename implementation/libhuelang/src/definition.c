@@ -96,10 +96,10 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
     bucket.max_size <<= 1;
     bucket.entries = realloc(bucket.entries, bucket.max_size);
   }
-  bucket.size += 1;
   bucket.entries[bucket.size].name = malloc(sizeof(char) * (strlen(token) + 1));
   strcpy(bucket.entries[bucket.size].name, token);
   result.minor = bucket.size;
+  bucket.size += 1;
 
   // Set the default definition of the word to none.
   if (strcmp(token, UNDEFINEDWORD) != 0) {
@@ -108,6 +108,9 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
     defaultdef.type = DefinitionTable_TokToWord(self, UNDEFINEDWORD);
     bucket.entries[bucket.size].definition = defaultdef;
   }
+
+  // Commit changes to the bucket
+  self->buckets[bucket_index] = bucket;  
 
   return result;
 }

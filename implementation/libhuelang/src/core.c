@@ -21,6 +21,7 @@ void __primary(Environment *env) {
     (primarydefinitiontype.minor == definitiontype.minor)) {
     void (*defhandler)(Environment*) = worddef.value.pointer;
     defhandler(env);
+    return;
   }
   Definition definitiontypede = DefinitionTable_GetDefinition(env->definition_table, definitiontype);
   // Verify if the type definition is primary

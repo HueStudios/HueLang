@@ -52,7 +52,7 @@ do
   then
     gcc -c -Wall -march=native -L./lib -llibhuelang -O2 -g0 $file
   else
-    gcc -c -Wall -march=native -L./lib -llibhuelang -Og -g $file
+    gcc -c -Wall -march=native -L./lib -llibhuelang -O0 -g $file
   fi
 done
 
@@ -64,7 +64,7 @@ if [[ $1 == "release" ]]
 then
   gcc -march=native -O2 -L./lib -lhuelang -g0 -o bin/huelang obj/*.o
 else
-  gcc -march=native -Og -L./lib -lhuelang -g -o bin/huelang obj/*.o
+  gcc -march=native -O0 -L./lib -lhuelang -g -o bin/huelang obj/*.o
 fi
 
 echo "<-> Done!"

@@ -34,6 +34,16 @@ Environment *Environment_Create() {
   return self;
 }
 
+// Helper function to quickly add a primary definition 
+void Environment_AddPrimaryDefinition (Environment *self,
+  Word word, void (*definition)(Environment *)) {
+  Word primaryword = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+  Definition thisdef;
+  thisdef.type = primaryword;
+  thisdef.value.pointer = definition;
+  DefinitionTable_SetDefinition(self->definition_table, word, thisdef);
+}
+
 // Push a word to the execution stack
 void Environment_PushExecution(Environment *self, Word topush) {
   ExecutionStackNode *newhead = malloc(sizeof(ExecutionStackNode));
