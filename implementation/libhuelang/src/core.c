@@ -30,6 +30,7 @@ void __primary(Environment *env) {
     // Call the primary definition handler.
     void (*defhandler)(Environment*) = definitiontypede.value.pointer;
     defhandler(env);
+    return;
   }
 }
 

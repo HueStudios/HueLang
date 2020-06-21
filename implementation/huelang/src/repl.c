@@ -9,7 +9,7 @@
 
 
 void __test(Environment *env) {
-  printf("HELLO WOLD\n");
+  printf("HELLO WORLD\n");
 }
 
 void Repl_Start() {
