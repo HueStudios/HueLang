@@ -3,6 +3,7 @@
 typedef struct Environment Environment;
 
 #define WORDWORD "word"
+#include <stdio.h>
 #include "environment.h"
 #include "type.h"
 #endif
@@ -10,29 +11,25 @@ typedef struct Environment Environment;
 #include "core.h"
 
 void __primary(Environment *env) {
-  if (env->execution_stack == NULL) return;
-  Word word = Environment_PeekExecution(env);
+  if (env->execution_stack == NULL) {
+    printf("WARNING - Called definition handler on an empty exec stack?\n");
+    return;
+  }
+  Word word = Environment_PopExecution(env);
   // Obtain the definition of the word.
   Definition worddef = DefinitionTable_GetDefinition(env->definition_table, word);
-  // Obtain the type of the definition
-  Word primarydefinitiontype = DefinitionTable_TokToWord(env->definition_table, PRIMARYDEFINITIONWORD);
-  Word definitiontype = worddef.type;
-  if ((primarydefinitiontype.major == definitiontype.major) & 
-    (primarydefinitiontype.minor == definitiontype.minor)) {
-    void (*defhandler)(Environment*) = worddef.value.pointer;
-    defhandler(env);
-    Environment_PopExecution(env);
+  void (*defhandler)(Environment*) = worddef.value.pointer;
+  defhandler(env);
+}
+
+void __undefined(Environment *env) {
+  if (env->execution_stack == NULL) {
+    printf("WARNING - Called definition handler on an empty exec stack?\n");
     return;
   }
-  Definition definitiontypede = DefinitionTable_GetDefinition(env->definition_table, definitiontype);
-  // Verify if the type definition is primary
-  if ((definitiontypede.type.major == primarydefinitiontype.major) & 
-    (definitiontypede.type.minor == primarydefinitiontype.minor)) {
-    // Call the primary definition handler.
-    void (*defhandler)(Environment*) = definitiontypede.value.pointer;
-    defhandler(env);
-    return;
-  }
+  Word word = Environment_PopExecution(env);
+  char *name = DefinitionTable_GetName(env->definition_table, word);
+  printf("Undefined word %s\n", name);
 }
 
 void Core_Initialize(Environment *env) {
@@ -41,8 +38,8 @@ void Core_Initialize(Environment *env) {
   Types_RegisterAtomicType(env, wordword, sizeof(Word));
 
   Word primaryword = DefinitionTable_TokToWord(env->definition_table, PRIMARYDEFINITIONWORD);
-  Definition primarydefinition;
-  primarydefinition.type = primaryword;
-  primarydefinition.value.pointer = &__primary;
-  DefinitionTable_SetDefinition(env->definition_table, primaryword, primarydefinition);
+  Environment_AddPrimaryDefinition(env, primaryword, &__primary);
+
+  Word undefinedword = DefinitionTable_TokToWord(env->definition_table, UNDEFINEDWORD);
+  Environment_AddPrimaryDefinition(env, undefinedword, &__undefined);
 }

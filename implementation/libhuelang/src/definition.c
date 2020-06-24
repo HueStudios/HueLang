@@ -72,6 +72,11 @@ Definition DefinitionTable_GetDefinition(DefinitionTable *self, Word word) {
   return self->buckets[word.major].entries[word.minor].definition;
 }
 
+// Get the name of a word.
+char *DefinitionTable_GetName(DefinitionTable *self, Word word) {
+  return self->buckets[word.major].entries[word.minor].name;
+}
+
 // Convert a token to a word. Also registers the word when needed.
 Word DefinitionTable_TokToWord(DefinitionTable *self, 
   char *token) {
@@ -80,9 +85,9 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   unsigned int bucket_index = hash & DEF_BUCKET_COUNT;
   result.major = bucket_index;
   // Try to find the token in its corresponding bucket.
-  DefinitionTableBucket bucket = self->buckets[bucket_index];
-  for (unsigned long i = 0; i < bucket.size; i++) {
-    DefinitionTableEntry entry = bucket.entries[i];
+  DefinitionTableBucket *bucket = &self->buckets[bucket_index];
+  for (unsigned long i = 0; i < bucket->size; i++) {
+    DefinitionTableEntry entry = bucket->entries[i];
     if (strcmp(entry.name, token) == 0) {
       // A word already has this token as its name, so 
       // it is returned. 
@@ -92,25 +97,23 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   }
   // No word has yet been registered with this token as 
   // its name. Therefore we must register it. 
-  if (bucket.size == bucket.max_size) {
-    bucket.max_size <<= 1;
-    bucket.entries = realloc(bucket.entries, bucket.max_size);
+  if (bucket->size == bucket->max_size) {
+    bucket->max_size <<= 1;
+    bucket->entries = realloc(bucket->entries, bucket->max_size);
   }
-  bucket.entries[bucket.size].name = malloc(sizeof(char) * (strlen(token) + 1));
-  strcpy(bucket.entries[bucket.size].name, token);
-  result.minor = bucket.size;
-  bucket.size += 1;
+  bucket->entries[bucket->size].name = malloc(sizeof(char) * (strlen(token) + 1));
+  strcpy(bucket->entries[bucket->size].name, token);
+  result.minor = bucket->size;
 
   // Set the default definition of the word to none.
   if (strcmp(token, UNDEFINEDWORD) != 0) {
     Definition defaultdef;
     defaultdef.value.number = 0;
     defaultdef.type = DefinitionTable_TokToWord(self, UNDEFINEDWORD);
-    bucket.entries[bucket.size].definition = defaultdef;
+    bucket->entries[bucket->size].definition = defaultdef;
   }
 
-  // Commit changes to the bucket
-  self->buckets[bucket_index] = bucket;  
+  bucket->size += 1;
 
   return result;
 }

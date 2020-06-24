@@ -66,20 +66,36 @@ Word Environment_PeekExecution(Environment *self) {
   return self->execution_stack->value;
 }
 
-// Forcibly evaluate a word in this environment.
-void Environment_ForciblyEvaluate(Environment *self) {
+// Evaluate a word in this environment.
+void Environment_Evaluate(Environment *self) {
+  if (self->execution_stack == NULL) return;
+  Word word = Environment_PeekExecution(self);
+  // Obtain the definition of the word.
+  Definition worddef = DefinitionTable_GetDefinition(self->definition_table, word);
+  // Obtain the type of the definition
   Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
-  Definition primarydefinition = DefinitionTable_GetDefinition(self->definition_table, primarydefinitiontype);
-  // Call the primary definition handler.
-  void (*defhandler)(Environment*) = primarydefinition.value.pointer;
-  defhandler(self);
+  Word definitiontype = worddef.type;
+  // If the type is primary:
+  if ((primarydefinitiontype.major == definitiontype.major) & 
+    (primarydefinitiontype.minor == definitiontype.minor)) {
+    //  Call the handler of primary to handle the evaluation
+    Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+    Definition primarydefinition = DefinitionTable_GetDefinition(self->definition_table, primarydefinitiontype);
+    void (*defhandler)(Environment*) = primarydefinition.value.pointer;
+    defhandler(self);
+  } else {
+    //  Push the type to the execution stack
+    Environment_PushExecution(self, definitiontype);
+    //  Call forced evaluation
+    Environment_Evaluate(self);
+  }
 } 
 
 // Enter the execution loop.
 void Environment_Run(Environment *self) {
   while (self->execution_stack != NULL) {
     // Evaluate it
-    Environment_ForciblyEvaluate(self);
+    Environment_Evaluate(self);
   }
 }
 
