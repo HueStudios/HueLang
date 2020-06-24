@@ -28,10 +28,10 @@ unsigned int Types_ResolveTypeSize(Environment *env, Word *type) {
   Word typetype = typedefinition.type;
   Word atomtypedefword = DefinitionTable_TokToWord(env->definition_table, ATOMTYPEDEFWORD);
   Word cptypedefword = DefinitionTable_TokToWord(env->definition_table, COMPOUNDTYPEDEFWORD);
-  if ((typetype.major == atomtypedefword.major) & (typetype.major == atomtypedefword.minor)) {
+  if ((typetype.major == atomtypedefword.major) & (typetype.minor == atomtypedefword.minor)) {
     return typedefinition.value.number;
   }
-  if ((typetype.major == cptypedefword.major) & (typetype.major == cptypedefword.minor)) {
+  if ((typetype.major == cptypedefword.major) & (typetype.minor == cptypedefword.minor)) {
     unsigned int (*type_handler)(Word*) = typedefinition.value.pointer;
     return type_handler(type);
   }

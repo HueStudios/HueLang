@@ -1,7 +1,10 @@
 #if INTERFACE
 
+typedef struct Environment Environment;
+
 #include <stdlib.h>
 #include "type.h"
+#include "environment.h"
 
 typedef struct ValueStack {
   unsigned long pointer;

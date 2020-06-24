@@ -1,9 +1,12 @@
 #if INTERFACE
 
+typedef struct ValueStack ValueStack;
+
 #include <stdlib.h>
 #include "definition.h"
 #include "type.h"
 #include "core.h"
+#include "values.h"
 
 #define PREPROCESSWORD "!preprocess"
 #define DEFAULTRESOLVEWORD "!defaultresolve"
@@ -17,6 +20,7 @@ typedef struct ExecutionStackNode {
 typedef struct Environment {
   DefinitionTable *definition_table;
   ExecutionStackNode *execution_stack;
+  ValueStack *value_stack;
 } Environment;
 
 #endif
@@ -28,6 +32,7 @@ typedef struct Environment {
 Environment *Environment_Create() {
   Environment *self = malloc(sizeof(Environment));
   self->definition_table = DefinitionTable_Create();
+  self->value_stack = ValueStack_Create();
 
   Core_Initialize(self);
 
