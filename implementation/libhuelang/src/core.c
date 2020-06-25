@@ -30,7 +30,8 @@ void __primary(Environment *env) {
   }
   Word word = Environment_PopExecution(env);
   // Obtain the definition of the word.
-  Definition worddef = DefinitionTable_GetDefinition(env->definition_table, word);
+  Definition worddef = DefinitionTable_GetDefinition(env->definition_table,
+    word);
   void (*defhandler)(Environment*) = worddef.value.pointer;
   defhandler(env);
 }
@@ -76,18 +77,23 @@ void __word_comprehension(Environment *env) {
   Word word = Environment_PeekExecution(env);
   char *name = DefinitionTable_GetName(env->definition_table, word);
   if (name[0] == ':') {
-    Word wordword = DefinitionTable_TokToWord(env->definition_table, WORDWORD);
+    Word wordword = DefinitionTable_TokToWord(env->definition_table,
+      WORDWORD);
     char *word_lit_name = name + 1;
-    Word word_lit = DefinitionTable_TokToWord(env->definition_table, word_lit_name);
+    Word word_lit = DefinitionTable_TokToWord(env->definition_table,
+      word_lit_name);
     Word *salloc = ValueStack_PushAlloc(env->value_stack, sizeof(Word)*2);
     salloc[0] = word_lit;
     salloc[1] = wordword;
-    Word stopCompFlagWord = DefinitionTable_TokToWord(env->definition_table, STOPCOMPWORD);
-    Word flagtype = DefinitionTable_TokToWord(env->definition_table, INTSTATEFLAG);
+    Word stopCompFlagWord = DefinitionTable_TokToWord(env->definition_table,
+      STOPCOMPWORD);
+    Word flagtype = DefinitionTable_TokToWord(env->definition_table,
+      INTSTATEFLAG);
     Definition stopCompDef;
     stopCompDef.type = flagtype;
     stopCompDef.value.number = 1;
-    DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord, stopCompDef);
+    DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord,
+      stopCompDef);
     Environment_PopExecution(env);
   }
 }
@@ -98,26 +104,31 @@ void __composite(Environment *env) {
   }
   Word word = Environment_PopExecution(env);
   // Obtain the definition of the word.
-  Definition worddef = DefinitionTable_GetDefinition(env->definition_table, word);
+  Definition worddef = DefinitionTable_GetDefinition(env->definition_table,
+    word);
   CompositeDefinition *compdef = worddef.value.pointer;
 
-  Word stopCompFlagWord = DefinitionTable_TokToWord(env->definition_table, STOPCOMPWORD);
-  Word flagtype = DefinitionTable_TokToWord(env->definition_table, INTSTATEFLAG);
+  Word stopCompFlagWord = DefinitionTable_TokToWord(env->definition_table,
+    STOPCOMPWORD);
+  Word flagtype = DefinitionTable_TokToWord(env->definition_table,
+    INTSTATEFLAG);
 
   volatile Definition stopCompDef;
   stopCompDef.type = flagtype;
   stopCompDef.value.number = 0;
-  DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord, stopCompDef);
+  DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord,
+    stopCompDef);
 
   Environment_PushExecution(env, compdef->f);
   Environment_Evaluate(env);
-  
-  stopCompDef = DefinitionTable_GetDefinition(env->definition_table, stopCompFlagWord);
+
+  stopCompDef = DefinitionTable_GetDefinition(env->definition_table,
+    stopCompFlagWord);
 
   if (stopCompDef.value.number != 1) {
     Environment_PushExecution(env, compdef->g);
     Environment_Evaluate(env);
-  } 
+  }
 }
 
 void Core_Initialize(Environment *env) {
@@ -125,33 +136,42 @@ void Core_Initialize(Environment *env) {
   Word wordword = DefinitionTable_TokToWord(env->definition_table, WORDWORD);
   Types_RegisterAtomicType(env, wordword, sizeof(Word));
 
-  Word atomictypeword = DefinitionTable_TokToWord(env->definition_table, ATOMTYPEDEFWORD);
+  Word atomictypeword = DefinitionTable_TokToWord(env->definition_table,
+    ATOMTYPEDEFWORD);
   Environment_AddPrimaryDefinition(env, atomictypeword, &__atomic);
 
-  Word compoundtypeword = DefinitionTable_TokToWord(env->definition_table, COMPOUNDTYPEDEFWORD);
+  Word compoundtypeword = DefinitionTable_TokToWord(env->definition_table,
+    COMPOUNDTYPEDEFWORD);
   Environment_AddPrimaryDefinition(env, compoundtypeword, &__compound);
 
-  Word primaryword = DefinitionTable_TokToWord(env->definition_table, PRIMARYDEFINITIONWORD);
+  Word primaryword = DefinitionTable_TokToWord(env->definition_table,
+    PRIMARYDEFINITIONWORD);
   Environment_AddPrimaryDefinition(env, primaryword, &__primary);
 
-  Word intflagword = DefinitionTable_TokToWord(env->definition_table, INTSTATEFLAG);
+  Word intflagword = DefinitionTable_TokToWord(env->definition_table,
+    INTSTATEFLAG);
   Environment_AddPrimaryDefinition(env, intflagword, &__intstate_flag);
 
-  Word wordcompword = DefinitionTable_TokToWord(env->definition_table, WORDCOMPREHENSIONWORD);
+  Word wordcompword = DefinitionTable_TokToWord(env->definition_table,
+    WORDCOMPREHENSIONWORD);
   Environment_AddPrimaryDefinition(env, wordcompword, &__word_comprehension);
 
-  Word undefinedfinalword = DefinitionTable_TokToWord(env->definition_table, UNDEFINEDFINALWORD);
+  Word undefinedfinalword = DefinitionTable_TokToWord(env->definition_table,
+    UNDEFINEDFINALWORD);
   Environment_AddPrimaryDefinition(env, undefinedfinalword, &__undefined_final);
 
-  Word compositeword = DefinitionTable_TokToWord(env->definition_table, COMPOSITEWORD);
+  Word compositeword = DefinitionTable_TokToWord(env->definition_table,
+    COMPOSITEWORD);
   Environment_AddPrimaryDefinition(env, compositeword, &__composite);
 
-  Word undefinedword = DefinitionTable_TokToWord(env->definition_table, UNDEFINEDWORD);
+  Word undefinedword = DefinitionTable_TokToWord(env->definition_table,
+    UNDEFINEDWORD);
   CompositeDefinition *undefinedwordefptr = malloc(sizeof(CompositeDefinition));
   undefinedwordefptr->f = wordcompword;
   undefinedwordefptr->g = undefinedfinalword;
   Definition undefinedworddef;
   undefinedworddef.type = compositeword;
   undefinedworddef.value.pointer = undefinedwordefptr;
-  DefinitionTable_SetDefinition(env->definition_table, undefinedword, undefinedworddef);
+  DefinitionTable_SetDefinition(env->definition_table, undefinedword,
+    undefinedworddef);
 }

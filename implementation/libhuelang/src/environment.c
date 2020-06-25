@@ -15,7 +15,7 @@ typedef struct ValueStack ValueStack;
 typedef struct ExecutionStackNode {
   Word value;
   ExecutionStackNode *next;
-} ExecutionStackNode; 
+} ExecutionStackNode;
 
 typedef struct Environment {
   DefinitionTable *definition_table;
@@ -26,7 +26,6 @@ typedef struct Environment {
 #endif
 
 #include "environment.h"
-
 
 // Create a runtime environment and return a pointer to it.
 Environment *Environment_Create() {
@@ -39,10 +38,11 @@ Environment *Environment_Create() {
   return self;
 }
 
-// Helper function to quickly add a primary definition 
+// Helper function to quickly add a primary definition
 void Environment_AddPrimaryDefinition (Environment *self,
   Word word, void (*definition)(Environment *)) {
-  Word primaryword = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+  Word primaryword = DefinitionTable_TokToWord(self->definition_table,
+    PRIMARYDEFINITIONWORD);
   Definition thisdef;
   thisdef.type = primaryword;
   thisdef.value.pointer = definition;
@@ -76,16 +76,21 @@ void Environment_Evaluate(Environment *self) {
   if (self->execution_stack == NULL) return;
   Word word = Environment_PeekExecution(self);
   // Obtain the definition of the word.
-  Definition worddef = DefinitionTable_GetDefinition(self->definition_table, word);
+  Definition worddef = DefinitionTable_GetDefinition(self->definition_table,
+    word);
   // Obtain the type of the definition
-  Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+  Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table,
+    PRIMARYDEFINITIONWORD);
   Word definitiontype = worddef.type;
   // If the type is primary:
-  if ((primarydefinitiontype.major == definitiontype.major) & 
+  if ((primarydefinitiontype.major == definitiontype.major) &
     (primarydefinitiontype.minor == definitiontype.minor)) {
     //  Call the handler of primary to handle the evaluation
-    Word primarydefinitiontype = DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
-    Definition primarydefinition = DefinitionTable_GetDefinition(self->definition_table, primarydefinitiontype);
+    Word primarydefinitiontype =
+      DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
+    Definition primarydefinition =
+      DefinitionTable_GetDefinition(self->definition_table,
+        primarydefinitiontype);
     void (*defhandler)(Environment*) = primarydefinition.value.pointer;
     defhandler(self);
   } else {
@@ -94,7 +99,7 @@ void Environment_Evaluate(Environment *self) {
     //  Call forced evaluation
     Environment_Evaluate(self);
   }
-} 
+}
 
 // Enter the execution loop.
 void Environment_Run(Environment *self) {

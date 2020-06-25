@@ -40,11 +40,11 @@ typedef struct DefinitionTableBucket {
 // Create a definition table and return a pointer to it.
 DefinitionTable *DefinitionTable_Create() {
   DefinitionTable *self = malloc(sizeof(DefinitionTable));
-  // Initialize all buckets to empty lists. 
+  // Initialize all buckets to empty lists.
   for (unsigned int i = 0; i < DEF_BUCKET_COUNT; i++) {
     self->buckets[i].max_size = 2;
     self->buckets[i].size = 0;
-    self->buckets[i].entries 
+    self->buckets[i].entries
       = calloc(INITIAL_DEF_BUCKET_SIZE,sizeof(DefinitionTableEntry));
   }
   return self;
@@ -62,12 +62,12 @@ unsigned long long String_HashForTable (char *str) {
 }
 
 // Set the definition of a word.
-void DefinitionTable_SetDefinition(DefinitionTable *self, Word word, 
+void DefinitionTable_SetDefinition(DefinitionTable *self, Word word,
   Definition definition) {
   self->buckets[word.major].entries[word.minor].definition = definition;
 }
 
-// Get the definition of a word. 
+// Get the definition of a word.
 Definition DefinitionTable_GetDefinition(DefinitionTable *self, Word word) {
   return self->buckets[word.major].entries[word.minor].definition;
 }
@@ -78,7 +78,7 @@ char *DefinitionTable_GetName(DefinitionTable *self, Word word) {
 }
 
 // Convert a token to a word. Also registers the word when needed.
-Word DefinitionTable_TokToWord(DefinitionTable *self, 
+Word DefinitionTable_TokToWord(DefinitionTable *self,
   char *token) {
   Word result;
   unsigned long long hash = String_HashForTable(token);
@@ -89,19 +89,20 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   for (unsigned long i = 0; i < bucket->size; i++) {
     DefinitionTableEntry entry = bucket->entries[i];
     if (strcmp(entry.name, token) == 0) {
-      // A word already has this token as its name, so 
-      // it is returned. 
+      // A word already has this token as its name, so
+      // it is returned.
       result.minor = i;
       return result;
     }
   }
-  // No word has yet been registered with this token as 
-  // its name. Therefore we must register it. 
+  // No word has yet been registered with this token as
+  // its name. Therefore we must register it.
   if (bucket->size == bucket->max_size) {
     bucket->max_size <<= 1;
     bucket->entries = realloc(bucket->entries, bucket->max_size);
   }
-  bucket->entries[bucket->size].name = malloc(sizeof(char) * (strlen(token) + 1));
+  bucket->entries[bucket->size].name = malloc(sizeof(char) *
+    (strlen(token) + 1));
   strcpy(bucket->entries[bucket->size].name, token);
   result.minor = bucket->size;
 
