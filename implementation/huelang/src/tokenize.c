@@ -1,8 +1,9 @@
 #if INTERFACE
-#include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
+#include "crudestream.h"
 #endif
 
 #include "tokenize.h"
@@ -18,17 +19,17 @@ void Tokens_AppendToBuffer (char **buffer, char to_add, unsigned int *len) {
 }
 
 // Read a single token from a file descriptor
-char *Tokens_ReadTokFromFDesc(int fd, unsigned int *len) {
+char *Tokens_ReadTokFromStream(int (*read_func)(char *, int), unsigned int *len) {
     char focus = 0;
     *len = 0;
     char *buffer = NULL;
     while (1) {
-        unsigned int bytes_read = read(fd, &focus, 1);
+        unsigned int bytes_read = read_func(&focus, 1);
         if (bytes_read == 0) {
             break;
         }
         if (isspace(focus)) {
-            if (*len == 0) return Tokens_ReadTokFromFDesc(fd, len);
+            if (*len == 0) return Tokens_ReadTokFromStream(read_func, len);
             break;
         }
         Tokens_AppendToBuffer(&buffer, focus, len);

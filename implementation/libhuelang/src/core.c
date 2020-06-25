@@ -9,6 +9,7 @@ typedef struct Environment Environment;
 #define INTSTATEFLAG "__flag"
 #define COMPOSITEWORD "composite"
 #include <stdio.h>
+#include <signal.h>
 #include "environment.h"
 #include "type.h"
 #include "values.h"
@@ -72,7 +73,7 @@ void __word_comprehension(Environment *env) {
   if (env->execution_stack == NULL) {
     return;
   }
-  Word word = Environment_PopExecution(env);
+  Word word = Environment_PeekExecution(env);
   char *name = DefinitionTable_GetName(env->definition_table, word);
   if (name[0] == ':') {
     Word wordword = DefinitionTable_TokToWord(env->definition_table, WORDWORD);
@@ -87,6 +88,7 @@ void __word_comprehension(Environment *env) {
     stopCompDef.type = flagtype;
     stopCompDef.value.number = 1;
     DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord, stopCompDef);
+    Environment_PopExecution(env);
   }
 }
 
@@ -102,7 +104,7 @@ void __composite(Environment *env) {
   Word stopCompFlagWord = DefinitionTable_TokToWord(env->definition_table, STOPCOMPWORD);
   Word flagtype = DefinitionTable_TokToWord(env->definition_table, INTSTATEFLAG);
 
-  Definition stopCompDef;
+  volatile Definition stopCompDef;
   stopCompDef.type = flagtype;
   stopCompDef.value.number = 0;
   DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord, stopCompDef);
@@ -111,7 +113,8 @@ void __composite(Environment *env) {
   Environment_Evaluate(env);
   
   stopCompDef = DefinitionTable_GetDefinition(env->definition_table, stopCompFlagWord);
-  if (stopCompDef.value.number == 1) {
+
+  if (stopCompDef.value.number != 1) {
     Environment_PushExecution(env, compdef->g);
     Environment_Evaluate(env);
   } 

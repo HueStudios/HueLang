@@ -1,7 +1,5 @@
 #if INTERFACE
-
 #include "repl.h"
-
 #endif
 
 #include "main.h"
