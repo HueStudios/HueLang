@@ -32,7 +32,7 @@ void *ValueStack_GetAbsolutePointer(ValueStack *self) {
 }
 
 void ValueStack_ResolveStackGrowth(ValueStack *self) {
-  if (self->pointer <= self->size) {
+  if (self->pointer >= self->size) {
     self->size *= 2;
     ValueStack_ResolveStackGrowth(self);
   }
