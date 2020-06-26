@@ -2,6 +2,7 @@
 
 #include "environment.h"
 #include <string.h>
+#include <signal.h>
 #include "interpreter.h"
 
 #define INCLUDEWORD "#include"
@@ -43,11 +44,12 @@ char *Modules_AppendPath(char *a, char *b) {
 }
 
 void __include (Environment *env) {
-  if (env->value_stack->size == 0) {
+  if (env->value_stack->pointer == 0) {
+    printf("exited\n");
     return;
   }
   Word *wordvalue = ValueStack_Pop(env->value_stack,env);
-  Word word = *(wordvalue - sizeof(Word));
+  Word word = *(wordvalue - 1);
   char *name = DefinitionTable_GetName(env->definition_table, word);
 
   Word inclusionwdword = DefinitionTable_TokToWord(
@@ -62,7 +64,6 @@ void __include (Environment *env) {
   char *prev_inclusionwd = inclusionwddef.value.pointer;
 
   char *inclusionpath = Modules_PathWithoutFilename(name);
-
   if (strlen(inclusionpath) == 0) {
     char *new_name = Modules_AppendPath(prev_inclusionwd,name);
     Interpreter_InterpretFile(env, new_name);
