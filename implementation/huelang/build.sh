@@ -16,6 +16,8 @@ echo "<-> Building dependencies..."
 
 cd ../libhuelang
 ./build.sh
+cd ../huemodule.std
+./build.sh
 cd ../huelang
 
 echo "<-> Making headers..."
@@ -38,6 +40,7 @@ echo "<-> Bringin dependencies in..."
 
 mkdir lib
 cp ../libhuelang/lib/* ./lib
+cp ../huemodule.std/module/* ./lib
 cp ../libhuelang/headers/* src/
 
 echo "<-> Building source files"

@@ -130,7 +130,7 @@ void __use(Environment *env) {
 
   char *module_filename = Modules_ObtainModuleFilename(name);
 
-  void *handle = dlopen(module_filename, RTLD_DEEPBIND);
+  void *handle = dlopen(module_filename, RTLD_LAZY);
 
   if (handle) {
     dlerror();
@@ -146,7 +146,7 @@ void __use(Environment *env) {
       module_init(env);
     }
   } else {
-    fprintf(stderr, "Unable to load %s\n", module_filename);
+    fprintf(stderr, "Unable to load >%s<\n", module_filename);
   }
   free(module_filename);
 }
