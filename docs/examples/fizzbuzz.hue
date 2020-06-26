@@ -1,0 +1,19 @@
+(
+  A simple program that computes fizzbuzz
+  for a given number.
+)
+
+:std #use
+
+[
+  { "" "" " fizz " } cycle
+  { "" "" "" "" " buzz " } cycle
+  zip
+  :append map
+  sflip
+  select
+] [ int ] [ string ] :fizzbuzz :
+
+3  fizzbuzz print
+5  fizzbuzz print
+15 fizzbuzz print
