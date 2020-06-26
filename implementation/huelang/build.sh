@@ -50,9 +50,9 @@ do
   echo "<!> Building $file ..."
   if [[ $1 == "release" ]]
   then
-    gcc -c -Wall -march=native -L./lib -lhuelang -lreadline -O2 -g0 $file
+    gcc -c -Wall -march=native -L./lib -ldl -lhuelang -lreadline -O2 -g0 $file
   else
-    gcc -c -Wall -march=native -L./lib -lhuelang -lreadline -O0 -g $file
+    gcc -c -Wall -march=native -L./lib -ldl -lhuelang -lreadline -O0 -g $file
   fi
 done
 
@@ -62,9 +62,9 @@ echo "<-> Compiling executable"
 
 if [[ $1 == "release" ]]
 then
-  gcc -march=native -O2 -L./lib -lhuelang -lreadline -g0 -o bin/huelang obj/*.o
+  gcc -march=native -O2 -L./lib -ldl -lhuelang -lreadline -g0 -o bin/huelang obj/*.o
 else
-  gcc -march=native -O0 -L./lib -lhuelang -lreadline -g -o bin/huelang obj/*.o
+  gcc -march=native -O0 -L./lib -ldl -lhuelang -lreadline -g -o bin/huelang obj/*.o
 fi
 
 echo "<-> Done!"

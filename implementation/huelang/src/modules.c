@@ -2,11 +2,16 @@
 
 #include "environment.h"
 #include <string.h>
-#include <signal.h>
+#include <dlfcn.h>
 #include "interpreter.h"
+
+#define MODULE_FILENAME_INITIAL "huemodule."
+#define MODULE_FILE_EXTENSION ".so"
 
 #define INCLUDEWORD "#include"
 #define INCLUSIONWDWORD "__inclusionwd"
+
+#define USEWORD "#use"
 
 #endif
 
@@ -45,7 +50,6 @@ char *Modules_AppendPath(char *a, char *b) {
 
 void __include (Environment *env) {
   if (env->value_stack->pointer == 0) {
-    printf("exited\n");
     return;
   }
   Word *wordvalue = ValueStack_Pop(env->value_stack,env);
@@ -100,10 +104,61 @@ void __include (Environment *env) {
   free(inclusionpath);
 }
 
+char *Modules_ObtainModuleFilename (char *modulename) {
+  char *initial_section = MODULE_FILENAME_INITIAL;
+  char *extension = MODULE_FILE_EXTENSION;
+  int initial_section_len = strlen(initial_section);
+  int modulename_len = strlen(modulename);
+  int extension_len = strlen(extension);
+  int final_len = initial_section_len + modulename_len + extension_len + 1;
+  char *result = malloc(sizeof(char) * final_len);
+  result[0] = '\0';
+  strcat(result,initial_section);
+  strcat(result,modulename);
+  strcat(result,extension);
+  return result;
+}
+
+void __use(Environment *env) {
+  if (env->value_stack->pointer == 0) {
+    return;
+  }
+
+  Word *wordvalue = ValueStack_Pop(env->value_stack,env);
+  Word word = *(wordvalue - 1);
+  char *name = DefinitionTable_GetName(env->definition_table, word);
+
+  char *module_filename = Modules_ObtainModuleFilename(name);
+
+  void *handle = dlopen(module_filename, RTLD_DEEPBIND);
+
+  if (handle) {
+    dlerror();
+
+    void (*module_init)(Environment *) = dlsym(handle,
+      "HueModule_Initialize");
+
+    char *error = dlerror();
+
+    if (error != NULL) {
+      fprintf(stderr, "%s\n", error);
+    } else {
+      module_init(env);
+    }
+  } else {
+    fprintf(stderr, "Unable to load %s\n", module_filename);
+  }
+  free(module_filename);
+}
+
 void Modules_Initialize (Environment *env) {
   Word includeword = DefinitionTable_TokToWord(env->definition_table,
     INCLUDEWORD);
   Environment_AddPrimaryDefinition(env, includeword, &__include);
+
+  Word useword = DefinitionTable_TokToWord(env->definition_table,
+    USEWORD);
+  Environment_AddPrimaryDefinition(env, useword, &__use);
 
   Word inclusionwdword = DefinitionTable_TokToWord(env->definition_table,
     INCLUSIONWDWORD);

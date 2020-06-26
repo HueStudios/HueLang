@@ -11,7 +11,7 @@
   zip
   :append map
   select
-] [ int ] [ string ] :fizzbuzz :
+] [ int ] [ string ] :fizzbuzz #:
 
 3  fizzbuzz print
 5  fizzbuzz print
