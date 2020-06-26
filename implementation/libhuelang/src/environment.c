@@ -8,8 +8,6 @@ typedef struct ValueStack ValueStack;
 #include "core.h"
 #include "values.h"
 
-#define PREPROCESSWORD "!preprocess"
-#define DEFAULTRESOLVEWORD "!defaultresolve"
 #define PRIMARYDEFINITIONWORD "primary"
 
 typedef struct ExecutionStackNode {

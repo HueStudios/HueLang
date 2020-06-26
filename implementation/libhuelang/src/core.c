@@ -6,7 +6,7 @@ typedef struct Environment Environment;
 #define STOPCOMPWORD "__stopcomposition?"
 #define WORDCOMPREHENSIONWORD "__wordcomprehension"
 #define UNDEFINEDFINALWORD "__undefinedfinal"
-#define INTSTATEFLAG "__flag"
+#define INTSTATEFLAG "__intstate"
 #define COMPOSITEWORD "composite"
 #include <stdio.h>
 #include <signal.h>
@@ -50,7 +50,7 @@ void __intstate_flag(Environment *env) {
     return;
   }
   Environment_PopExecution(env);
-  printf("Internal state flag\n");
+  printf("Internal state value\n");
 }
 
 void __atomic(Environment *env) {
@@ -113,7 +113,7 @@ void __composite(Environment *env) {
   Word flagtype = DefinitionTable_TokToWord(env->definition_table,
     INTSTATEFLAG);
 
-  volatile Definition stopCompDef;
+  Definition stopCompDef;
   stopCompDef.type = flagtype;
   stopCompDef.value.number = 0;
   DefinitionTable_SetDefinition(env->definition_table, stopCompFlagWord,
