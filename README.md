@@ -1,16 +1,18 @@
 # HueLang
 
+![logo](https://raw.githubusercontent.com/HueStudios/HueLang/master/docs/logo.png)
+
 A language designed to do everything.
 
 ## Inspiration
 
-This project is heavily inspired by [nexustix](https://github.com/nexustix/reconn-c)'s [reconn](https://github.com/nexustix/reconn-c). 
+This project is heavily inspired by [nexustix](https://github.com/nexustix/reconn-c)'s [reconn](https://github.com/nexustix/reconn-c).
 
 Nexustix also often has to listen to me ranting about creating the perfect language and stuff, so kudos to him.
 
 ## Goals
 
-- Be expandable. 
+- Be expandable.
 - Be fast.
 - Be more expandable.
 - Be domain specific to literally any domain or no domain at all.
