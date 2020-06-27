@@ -9,10 +9,10 @@ typedef struct Environment Environment;
 typedef struct ValueStack {
   unsigned long pointer;
   unsigned long size;
-  unsigned char *data;
+  void *data;
 } ValueStack;
 
-#define INITIALVALUESTACKSIZE 0xFF
+#define INITIALVALUESTACKSIZE 0x100
 
 #endif
 
@@ -39,10 +39,12 @@ void ValueStack_ResolveStackGrowth(ValueStack *self) {
 }
 
 void *ValueStack_PushAlloc(ValueStack *self, unsigned int size) {
-  void *result = ValueStack_GetAbsolutePointer(self);
   self->pointer += size;
   ValueStack_ResolveStackGrowth(self);
   self->data = realloc(self->data, self->size);
+  self->pointer -= size;
+  void *result = ValueStack_GetAbsolutePointer(self);
+  self->pointer += size;
   return result;
 }
 

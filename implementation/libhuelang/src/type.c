@@ -19,7 +19,7 @@ void Types_RegisterAtomicType(Environment *env, Word typename,
 }
 
 void Types_RegisterCompoundType(Environment *env, Word typename,
-  unsigned int (*type_handler)(Word*)) {
+  unsigned long (*type_handler)(Environment*, Word*)) {
   Word compoundtypedefword = DefinitionTable_TokToWord(env->definition_table,
     COMPOUNDTYPEDEFWORD);
   Definition typedefinition;
@@ -29,7 +29,7 @@ void Types_RegisterCompoundType(Environment *env, Word typename,
     typedefinition);
 }
 
-unsigned int Types_ResolveTypeSize(Environment *env, Word *type) {
+unsigned long Types_ResolveTypeSize(Environment *env, Word *type) {
   Definition typedefinition =
     DefinitionTable_GetDefinition(env->definition_table, *type);
   Word typetype = typedefinition.type;
@@ -40,11 +40,11 @@ unsigned int Types_ResolveTypeSize(Environment *env, Word *type) {
   if ((typetype.major == atomtypedefword.major) &
     (typetype.minor == atomtypedefword.minor)) {
     return typedefinition.value.number;
-  }
-  if ((typetype.major == cptypedefword.major) &
+  } else if ((typetype.major == cptypedefword.major) &
     (typetype.minor == cptypedefword.minor)) {
-    unsigned int (*type_handler)(Word*) = typedefinition.value.pointer;
-    return type_handler(type);
+    unsigned long (*type_handler)(Environment*,Word*)
+      = typedefinition.value.pointer;
+    return type_handler(env,type);
   }
   return 0;
 }

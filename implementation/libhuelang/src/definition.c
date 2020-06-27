@@ -118,3 +118,30 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
 
   return result;
 }
+
+// Create a new word with a random name, sharing the same definition as
+// an original.
+Word DefinitionTable_CreatAnonymousDefinition (DefinitionTable *self,
+  Word original) {
+  char *original_name = DefinitionTable_GetName(self, original);
+  unsigned int original_len = strlen(original_name);
+  unsigned int new_len = original_len + 1 + 16 + 1;
+  char *new_name = malloc(sizeof(char) * new_len);
+  for (int i = 0; i < new_len - 1; i++) {
+    if (i < original_len) {
+      new_name[i] = original_name[i];
+    }
+    if (i == original_len) {
+      new_name[i] = '_';
+    }
+    if (i > original_len) {
+      new_name[i] = rand() % (126 + 1 - 33) + 33;
+    }
+  }
+  new_name[new_len-1] = '\0';
+  Word result = DefinitionTable_TokToWord(self, new_name);
+  Definition def = DefinitionTable_GetDefinition(self, original);
+  DefinitionTable_SetDefinition(self, result, def);
+  free(new_name);
+  return result;
+}
