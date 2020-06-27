@@ -8,6 +8,7 @@ typedef struct Environment Environment;
 #define UNDEFINEDFINALWORD "__undefinedfinal"
 #define INTSTATEFLAG "__intstate"
 #define COMPOSITEWORD "composite"
+#define INACTIONWORD "inaction"
 #include <stdio.h>
 #include <signal.h>
 #include "environment.h"
@@ -131,6 +132,13 @@ void __composite(Environment *env) {
   }
 }
 
+void __inaction(Environment *env) {
+  if (env->execution_stack == NULL) {
+    return;
+  }
+  Environment_PopExecution(env);
+}
+
 void Core_Initialize(Environment *env) {
   // This is the best piece of code I've written in my life.
   Word wordword = DefinitionTable_TokToWord(env->definition_table, WORDWORD);
@@ -163,6 +171,18 @@ void Core_Initialize(Environment *env) {
   Word compositeword = DefinitionTable_TokToWord(env->definition_table,
     COMPOSITEWORD);
   Environment_AddPrimaryDefinition(env, compositeword, &__composite);
+
+  Word inactionword = DefinitionTable_TokToWord(env->definition_table,
+    INACTIONWORD);
+  Environment_AddPrimaryDefinition(env, inactionword, &__inaction);
+
+  Word preevalword =
+    DefinitionTable_TokToWord(env->definition_table, PREEVALWORD);
+  Definition preevalworddef;
+  preevalworddef.type = inactionword;
+  preevalworddef.value.number = 0;
+  DefinitionTable_SetDefinition(env->definition_table, preevalword,
+    preevalworddef);
 
   Word undefinedword = DefinitionTable_TokToWord(env->definition_table,
     UNDEFINEDWORD);

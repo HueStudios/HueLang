@@ -2,6 +2,7 @@
 
 typedef struct ValueStack ValueStack;
 
+#include <signal.h>
 #include <stdlib.h>
 #include "definition.h"
 #include "type.h"
@@ -9,6 +10,7 @@ typedef struct ValueStack ValueStack;
 #include "values.h"
 
 #define PRIMARYDEFINITIONWORD "primary"
+#define PREEVALWORD "preeval"
 
 typedef struct ExecutionStackNode {
   Word value;
@@ -100,7 +102,13 @@ void Environment_Evaluate(Environment *self) {
 // Enter the execution loop.
 void Environment_Run(Environment *self) {
   while (self->execution_stack != NULL) {
-    // Evaluate it
+    // Eval preeval for syntax extension
+    Word preevalword =
+      DefinitionTable_TokToWord(self->definition_table, PREEVALWORD);
+    //raise(SIGINT);
+    Environment_PushExecution(self, preevalword);
+    Environment_Evaluate(self);
+    // Evaluate the word itself
     Environment_Evaluate(self);
   }
 }
