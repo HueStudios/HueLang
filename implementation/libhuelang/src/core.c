@@ -10,7 +10,6 @@ typedef struct Environment Environment;
 #define COMPOSITEWORD "composite"
 #define INACTIONWORD "inaction"
 #include <stdio.h>
-#include <signal.h>
 #include "environment.h"
 #include "type.h"
 #include "values.h"

@@ -121,7 +121,7 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
 
 // Create a new word with a random name, sharing the same definition as
 // an original.
-Word DefinitionTable_CreatAnonymousDefinition (DefinitionTable *self,
+Word DefinitionTable_MakeAnonymousDefinition (DefinitionTable *self,
   Word original) {
   char *original_name = DefinitionTable_GetName(self, original);
   unsigned int original_len = strlen(original_name);

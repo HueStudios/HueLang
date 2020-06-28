@@ -1,7 +1,6 @@
 #if INTERFACE
 
 #include "environment.h"
-#include <signal.h>
 #include "values.h"
 #include "type.h"
 
@@ -46,7 +45,7 @@ void __listend(Environment *env) {
   unsigned long *count_ptr = salloc;
   unsigned long *size_ptr = count_ptr + 1;
   unsigned long *header_ptr_i = size_ptr + 1;
-  Word *header_ptr = header_ptr_i;
+  Word *header_ptr = (Word*)header_ptr_i;
   unsigned long size =
     ((unsigned long)ValueStack_GetAbsolutePointer(env->value_stack))-
     ((unsigned long)focus) - sizeof(Word);
