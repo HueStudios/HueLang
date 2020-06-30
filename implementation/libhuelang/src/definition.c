@@ -19,7 +19,7 @@ typedef struct Definition {
 } Definition;
 
 typedef struct DefinitionTable {
-  DefinitionTableBucket buckets[DEF_BUCKET_COUNT];
+  DefinitionTableBucket buckets[DEF_BUCKET_COUNT + 1];
 } DefinitionTable;
 
 typedef struct DefinitionTableEntry {
@@ -41,7 +41,7 @@ typedef struct DefinitionTableBucket {
 DefinitionTable *DefinitionTable_Create() {
   DefinitionTable *self = malloc(sizeof(DefinitionTable));
   // Initialize all buckets to empty lists.
-  for (unsigned int i = 0; i < DEF_BUCKET_COUNT; i++) {
+  for (unsigned int i = 0; i <= DEF_BUCKET_COUNT; i++) {
     self->buckets[i].max_size = 2;
     self->buckets[i].size = 0;
     self->buckets[i].entries
