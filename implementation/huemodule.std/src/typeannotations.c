@@ -3,21 +3,12 @@
 #include "definition.h"
 #include "environment.h"
 #include "utils.h"
+#include <limits.h>
 #define SUBSETTABLEPREFIX "__subsets_"
 #define SUBSET_BUCKET_COUNT 0xF
 
-typedef struct SubsetTableEntry {
-  Word type;
-  SubsetTableEntry *next;
-} SubsetTableEntry;
-
-typedef struct SubsetTableBucket {
-  unsigned int size;
-  SubsetTableEntry *head;
-} SubsetTableBucket;
-
 typedef struct SubsetTable {
-  SubsetTableBucket buckets[SUBSET_BUCKET_COUNT + 1];
+  WordLinkedList buckets[SUBSET_BUCKET_COUNT + 1];
 } SubsetTable;
 
 #endif
@@ -38,18 +29,18 @@ void SubsetTable_AddSubset (SubsetTable *self, Environment *env,
   char *subset_name = DefinitionTable_GetName(env->definition_table, subset);
   unsigned long long hash = String_HashForTable(subset_name);
   unsigned char bucket_index = hash & SUBSET_BUCKET_COUNT;
-  SubsetTableBucket *bucket = &self->buckets[bucket_index];
-  SubsetTableEntry *new_entry = malloc(sizeof(SubsetTableEntry));
+  WordLinkedList *bucket = &self->buckets[bucket_index];
+  WordLinkedListNode *new_entry = malloc(sizeof(WordLinkedListNode));
   new_entry->next = bucket->head;
   new_entry->type = subset;
   bucket->head = new_entry;
   bucket->size++;
 }
 
-unsigned char TypeAnnotations_HasSubsetType(Environment *env, Word set,
+unsigned short TypeAnnotations_HasSubsetType(Environment *env, Word set,
   Word subset) {
   if (set.major == subset.major && set.minor == subset.minor) {
-    return 1;
+    return 0;
   }
   char *set_name = DefinitionTable_GetName(env->definition_table, set);
   char *subset_table_name = Utils_MallocConcat(SUBSETTABLEPREFIX, set_name);
@@ -64,22 +55,26 @@ unsigned char TypeAnnotations_HasSubsetType(Environment *env, Word set,
     INTSTATEFLAG);
   if (subset_table_def.type.major != intflagword.major ||
     subset_table_def.type.minor != intflagword.minor) {
-    return 0;
+    return USHRT_MAX;
   }
   SubsetTable *table = subset_table_def.value.pointer;
 
-  char *subset_name = DefinitionTable_GetName(env->definition_table, subset);
-  unsigned long long hash = String_HashForTable(subset_name);
-  unsigned char bucket_index = hash & SUBSET_BUCKET_COUNT;
-  SubsetTableBucket *bucket = &table->buckets[bucket_index];
-  for (SubsetTableEntry *focus = bucket->head; focus != NULL;
-    focus = focus->next) {
-    Word type = focus->type;
-    if (TypeAnnotations_HasSubsetType(env, type, subset)) {
-      return 1;
+  unsigned short min = USHRT_MAX;
+  for (unsigned char bucket_index = 0; bucket_index <= SUBSET_BUCKET_COUNT;
+    bucket_index++) {
+    WordLinkedList *bucket = &table->buckets[bucket_index];
+    for (WordLinkedListNode *focus = bucket->head; focus != NULL;
+      focus = focus->next) {
+      Word type = focus->type;
+      unsigned short in_result =
+        TypeAnnotations_HasSubsetType(env, type, subset);
+      if (in_result != USHRT_MAX) in_result++;
+      if (in_result < min) {
+        min = in_result;
+      }
     }
   }
-  return 0;
+  return min;
 }
 
 void TypeAnnotations_AddSubsetType(Environment *env, Word set, Word subset) {
