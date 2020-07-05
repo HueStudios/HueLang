@@ -6,7 +6,7 @@ typedef struct Word {
 } Word;
 
 typedef struct WordLinkedListNode {
-  Word type;
+  Word word;
   WordLinkedListNode *next;
 } WordLinkedListNode;
 

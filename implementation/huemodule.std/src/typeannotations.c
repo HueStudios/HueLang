@@ -3,6 +3,7 @@
 #include "definition.h"
 #include "environment.h"
 #include "utils.h"
+#include <math.h>
 #include <limits.h>
 #define SUBSETTABLEPREFIX "__subsets_"
 #define SUBSET_BUCKET_COUNT 0xF
@@ -32,7 +33,7 @@ void SubsetTable_AddSubset (SubsetTable *self, Environment *env,
   WordLinkedList *bucket = &self->buckets[bucket_index];
   WordLinkedListNode *new_entry = malloc(sizeof(WordLinkedListNode));
   new_entry->next = bucket->head;
-  new_entry->type = subset;
+  new_entry->word = subset;
   bucket->head = new_entry;
   bucket->size++;
 }
@@ -65,7 +66,7 @@ unsigned short TypeAnnotations_HasSubsetType(Environment *env, Word set,
     WordLinkedList *bucket = &table->buckets[bucket_index];
     for (WordLinkedListNode *focus = bucket->head; focus != NULL;
       focus = focus->next) {
-      Word type = focus->type;
+      Word type = focus->word;
       unsigned short in_result =
         TypeAnnotations_HasSubsetType(env, type, subset);
       if (in_result != USHRT_MAX) in_result++;
@@ -98,4 +99,27 @@ void TypeAnnotations_AddSubsetType(Environment *env, Word set, Word subset) {
   }
   SubsetTable *table = subset_table_def.value.pointer;
   SubsetTable_AddSubset(table, env, subset);
+}
+
+double TypeAnnotations_AnnotationDistance(Environment *env, WordLinkedList
+  *annotation, WordLinkedList *to_verify) {
+  if(annotation->size != to_verify->size) {
+    return -1.0;
+  }
+  double accum = 0;
+  WordLinkedListNode *ann_focus;
+  WordLinkedListNode *ver_focus = to_verify->head;
+  for (ann_focus = annotation->head; ann_focus != NULL;
+    ann_focus = ann_focus->next) {
+    Word ann_word = ann_focus->word;
+    Word ver_word = ver_focus->word;
+    unsigned short distance1d = TypeAnnotations_HasSubsetType(env, ann_word,
+      ver_word);
+    if (distance1d == USHRT_MAX) {
+      return -1;
+    }
+    accum += ((double)distance1d)*((double)distance1d);
+    ver_focus = ver_focus->next;
+  }
+  return sqrt(accum);
 }
