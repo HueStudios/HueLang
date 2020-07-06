@@ -34,8 +34,9 @@ void __listend(Environment *env) {
   Word *focus;
   for (
     focus = (ValueStack_GetAbsolutePointer(env->value_stack) - sizeof(Word));
-    focus->major != listdelimiterword.major ||
-    focus->minor != listdelimiterword.minor;
+    (focus->major != listdelimiterword.major ||
+    focus->minor != listdelimiterword.minor) &&
+    (void*)focus >= env->value_stack->data;
     focus = (Word*)(((void*)focus) - Types_ResolveTypeSize(env,focus)) - 1
   ) {
     count++;

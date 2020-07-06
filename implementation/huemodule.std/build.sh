@@ -49,9 +49,9 @@ do
   echo "<!> Building $file ..."
   if [[ $1 == "release" ]]
   then
-    gcc -c -Wall -fpic -march=native -L./lib -lhuelang -O2 -g0 $file
+    gcc -c -Wall -fpic -march=native -L./lib -lhuelang -lm -O2 -g0 $file
   else
-    gcc -c -Wall -fpic -march=native -L./lib -lhuelang -Og -g $file
+    gcc -c -Wall -fpic -march=native -L./lib -lhuelang -lm -Og -g $file
   fi
 done
 
@@ -61,9 +61,9 @@ echo "<-> Compiling shared object"
 
 if [[ $1 == "release" ]]
 then
-  gcc -march=native -O2 -L./lib -lhuelang -g0 -shared -o module/huemodule.std.so obj/*.o
+  gcc -march=native -O2 -L./lib -lhuelang -lm -g0 -shared -o module/huemodule.std.so obj/*.o
 else
-  gcc -march=native -Og -L./lib -lhuelang -g -shared -o module/huemodule.std.so obj/*.o
+  gcc -march=native -Og -L./lib -lhuelang -lm -g -shared -o module/huemodule.std.so obj/*.o
 fi
 
 echo "<-> Done!"

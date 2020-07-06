@@ -38,7 +38,7 @@ void SubsetTable_AddSubset (SubsetTable *self, Environment *env,
   bucket->size++;
 }
 
-unsigned short TypeAnnotations_HasSubsetType(Environment *env, Word set,
+unsigned short TypeAnnotations_SubsetDistance(Environment *env, Word set,
   Word subset) {
   if (set.major == subset.major && set.minor == subset.minor) {
     return 0;
@@ -68,7 +68,7 @@ unsigned short TypeAnnotations_HasSubsetType(Environment *env, Word set,
       focus = focus->next) {
       Word type = focus->word;
       unsigned short in_result =
-        TypeAnnotations_HasSubsetType(env, type, subset);
+        TypeAnnotations_SubsetDistance(env, type, subset);
       if (in_result != USHRT_MAX) in_result++;
       if (in_result < min) {
         min = in_result;
@@ -102,24 +102,30 @@ void TypeAnnotations_AddSubsetType(Environment *env, Word set, Word subset) {
 }
 
 double TypeAnnotations_AnnotationDistance(Environment *env, WordLinkedList
-  *annotation, WordLinkedList *to_verify) {
-  if(annotation->size != to_verify->size) {
-    return -1.0;
-  }
-  double accum = 0;
+  *annotation) {
+  double accum = 0.0;
   WordLinkedListNode *ann_focus;
-  WordLinkedListNode *ver_focus = to_verify->head;
+  Word *st_focus = (ValueStack_GetAbsolutePointer(env->value_stack)
+    - sizeof(Word));
+
   for (ann_focus = annotation->head; ann_focus != NULL;
     ann_focus = ann_focus->next) {
+    if ((void*)st_focus < env->value_stack->data) {
+      return -1.0;
+    }
+
+    Word ver_word = *st_focus;
     Word ann_word = ann_focus->word;
-    Word ver_word = ver_focus->word;
-    unsigned short distance1d = TypeAnnotations_HasSubsetType(env, ann_word,
+
+    unsigned short distance1d = TypeAnnotations_SubsetDistance(env, ann_word,
       ver_word);
     if (distance1d == USHRT_MAX) {
-      return -1;
+      return -1.0;
     }
     accum += ((double)distance1d)*((double)distance1d);
-    ver_focus = ver_focus->next;
+
+    st_focus =
+      (Word*)(((void*)st_focus) - Types_ResolveTypeSize(env,st_focus)) - 1;
   }
   return sqrt(accum);
 }
