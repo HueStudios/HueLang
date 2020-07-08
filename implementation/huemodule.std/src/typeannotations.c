@@ -4,6 +4,7 @@
 #include "environment.h"
 #include "utils.h"
 #include <math.h>
+#include <float.h>
 #include <limits.h>
 #define SUBSETTABLEPREFIX "__subsets_"
 #define SUBSET_BUCKET_COUNT 0xF
@@ -11,6 +12,17 @@
 typedef struct SubsetTable {
   WordLinkedList buckets[SUBSET_BUCKET_COUNT + 1];
 } SubsetTable;
+
+typedef struct AnnotationPair {
+  WordArrayList annotation;
+  Word target;
+}
+
+typedef struct TypeAnnotatedDefinition {
+  AnnotationPair *pairs;
+  unsigned int size;
+  unsigned int max_size;
+}
 
 #endif
 
@@ -101,21 +113,19 @@ void TypeAnnotations_AddSubsetType(Environment *env, Word set, Word subset) {
   SubsetTable_AddSubset(table, env, subset);
 }
 
-double TypeAnnotations_AnnotationDistance(Environment *env, WordLinkedList
-  *annotation) {
+double TypeAnnotations_AnnotationDistance(Environment *env, WordArrayList
+  annotation) {
   double accum = 0.0;
-  WordLinkedListNode *ann_focus;
   Word *st_focus = (ValueStack_GetAbsolutePointer(env->value_stack)
     - sizeof(Word));
 
-  for (ann_focus = annotation->head; ann_focus != NULL;
-    ann_focus = ann_focus->next) {
+  for (unsigned int i = 0; i < annotation.size; i++) {
     if ((void*)st_focus < env->value_stack->data) {
       return -1.0;
     }
 
     Word ver_word = *st_focus;
-    Word ann_word = ann_focus->word;
+    Word ann_word = annotation.data[i];
 
     unsigned short distance1d = TypeAnnotations_SubsetDistance(env, ann_word,
       ver_word);
@@ -128,4 +138,40 @@ double TypeAnnotations_AnnotationDistance(Environment *env, WordLinkedList
       (Word*)(((void*)st_focus) - Types_ResolveTypeSize(env,st_focus)) - 1;
   }
   return sqrt(accum);
+}
+
+void __typeannotated(Environment *env) {
+  if (env->execution_stack == NULL) {
+    return;
+  }
+  Word word = Environment_PopExecution(env);
+  // Obtain the definition of the word.
+  Definition worddef = DefinitionTable_GetDefinition(env->definition_table,
+    word);
+
+  TypeAnnotatedDefinition *annodef = worddef.value.pointer;
+
+  double min_score = DBL_MAX;
+  unsigned int max_param = 0;
+  unsigned int best_index = 0;
+
+  for (unsigned int i = 0; i < annodef->size; i++) {
+    if (annodef->pairs[i].annotation.size < max_param) continue;
+
+    double this_score = TypeAnnotations_AnnotationDistance(env,
+      annodef->pairs[i].annotation);
+
+    if (this_score == -1.0) continue;
+
+    if (annodef->pairs[i].annotation.size > max_param ||
+      this_score < min_score) {
+      max_param = annodef->pairs[i].annotation.size;
+      max_score = this_score;
+      best_index = i;
+    }
+  }
+
+  if (min_score != DBL_MAX) {
+    Environment_PushExecution(env, annodef->pairs[i].target);
+  }
 }

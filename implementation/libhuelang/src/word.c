@@ -15,6 +15,10 @@ typedef struct WordLinkedList {
   WordLinkedListNode *head;
 } WordLinkedList;
 
+typedef struct WordArrayList {
+  Word *data;
+  unsigned int size;
+} WordArrayList;
 
 #endif
 
