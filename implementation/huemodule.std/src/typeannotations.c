@@ -9,13 +9,16 @@
 #define SUBSETTABLEPREFIX "__subsets_"
 #define SUBSET_BUCKET_COUNT 0xF
 
+#define TYPEANNOTATEDWORD "typeannotated"
+
 typedef struct SubsetTable {
   WordLinkedList buckets[SUBSET_BUCKET_COUNT + 1];
 } SubsetTable;
 
 typedef struct AnnotationPair {
   WordArrayList annotation;
-  Word target;
+  WordArrayList production;
+  Word tocall;
 }
 
 typedef struct TypeAnnotatedDefinition {
@@ -140,6 +143,75 @@ double TypeAnnotations_AnnotationDistance(Environment *env, WordArrayList
   return sqrt(accum);
 }
 
+void TypeAnnotations_MakeDefinition(Environment *env, Word
+  word) {
+  Word typeannotatedword = DefinitionTable_TokToWord(env->definition_table,
+    TYPEANNOTATEDWORD);
+
+  TypeAnnotatedDefinition *tadef = malloc(sizeof(TypeAnnotatedDefinition));
+  tadef->size = 0;
+  tadef->max_size = 1;
+  tadef->pairs = malloc(sizeof(AnnotationPair));
+
+  Definition newdef;
+  newdef.type = typeannotatedword;
+  newdef.value.pointer = tadef;
+
+  DefinitionTable_SetDefinition(env->definition_table, word,
+    newdef);
+}
+
+void TypeAnnotations_AddEntry(Environment *env, Word target, Word tocall,
+  WordArrayList annotation, WordArrayList production) {
+
+  Word typeannotatedword = DefinitionTable_TokToWord(env->definition_table,
+    TYPEANNOTATEDWORD);
+  Definition defcont = DefinitionTable_GetDefinition(env->definition_table,
+    target);
+
+  if (defcont.type.major != typeannotatedword.major ||
+    defcont.type.minor != typeannotatedword.minor) {
+    // ERROR can't add entry to a non-annotated definition.
+    return;
+  }
+
+  TypeAnnotatedDefinition *tadef = defcont.value.pointer;
+
+  for (unsigned int i = 0; i < tadef->size; i++) {
+    AnnotationPair pair = tadef->pairs[i];
+    WordArrayList thisAnnotation = pair.annotation;
+    if (thisAnnotation.size == annotation.size) {
+      unsigned char matching = 1;
+      for (unsigned int j = 0; j < annotation.size; j++) {
+        Word focusWord = thisAnnotation.data[j];
+        Word otherWord = annotation.data[j];
+        if (focusWord.major != otherWord.major ||
+          focusWord.minor != otherWord.minor) {
+          matching = 0;
+          break;
+        }
+      }
+      if (matching) {
+        free(tadef->pairs[i].production.data);
+        tadef->pairs[i].production = production;
+        tadef->pairs[i].tocall = tocall;
+        return;
+      }
+    }
+  }
+
+  AnnotationPair new_pair;
+  new_pair.annotation = annotation;
+  new_pair.production = production;
+  new_pair.tocall = tocall;
+
+  tadef->pairs[tadef->size] = new_pair;
+  if (tadef->size == tadef->max_size) {
+    tadef->max_size *= 2;
+    tadef->pairs = realloc(tadef->pairs, tadef->max_size);
+  }
+}
+
 void __typeannotated(Environment *env) {
   if (env->execution_stack == NULL) {
     return;
@@ -166,12 +238,12 @@ void __typeannotated(Environment *env) {
     if (annodef->pairs[i].annotation.size > max_param ||
       this_score < min_score) {
       max_param = annodef->pairs[i].annotation.size;
-      max_score = this_score;
+      min_score = this_score;
       best_index = i;
     }
   }
 
   if (min_score != DBL_MAX) {
-    Environment_PushExecution(env, annodef->pairs[i].target);
+    Environment_PushExecution(env, annodef->pairs[best_index].tocall);
   }
 }
