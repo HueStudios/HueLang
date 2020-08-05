@@ -110,3 +110,29 @@ void WordLists_Initialize(Environment *env) {
   DefinitionTable_SetDefinition(env->definition_table, preevalword,
     preevalworddef);
 }
+
+WordArrayList ExtractWordlistFromValue (Environment *env, Word *value_ptr) {
+  unsigned long *header_ptr_i = (unsigned long *)value_ptr;
+  unsigned long *size_ptr = header_ptr_i - 1;
+  unsigned long *count_ptr = size_ptr - 1;
+  unsigned long count = *count_ptr;
+  WordArrayList result;
+  result.size = count;
+  result.data = malloc(sizeof(Word) * count);
+  unsigned long iterator = 0;
+  Word listdelimiterword = DefinitionTable_TokToWord(env->definition_table,
+    LISTDELIMITERWORD);
+  Word *focus;
+  for (
+    focus = ((Word*)count_ptr) - 1;
+    (focus->major != listdelimiterword.major ||
+    focus->minor != listdelimiterword.minor) &&
+    (void*)focus >= env->value_stack->data &&
+    iterator < count;
+    focus = (Word*)(((void*)focus) - Types_ResolveTypeSize(env,focus)) - 1
+  ) {
+    result.data[iterator] = *(focus - 1);
+    iterator++;
+  }
+  return result;
+}

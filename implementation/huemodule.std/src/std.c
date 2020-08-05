@@ -2,6 +2,7 @@
 
 #include "environment.h"
 #include "list.h"
+#include "secondary.h"
 #include "wordlist.h"
 
 #endif
@@ -18,4 +19,5 @@ void HueModule_Initialize (Environment *env) {
   Environment_AddPrimaryDefinition(env, helloword, &__hello);
   Lists_Initialize(env);
   WordLists_Initialize(env);
+  Secondary_Initialize(env);
 }
