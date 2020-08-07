@@ -16,8 +16,8 @@ typedef struct SubsetTable {
 } SubsetTable;
 
 typedef struct AnnotationPair {
-  WordArrayList annotation;
-  WordArrayList production;
+  WordArrayList *annotation;
+  WordArrayList *production;
   Word tocall;
 }
 
@@ -117,18 +117,18 @@ void TypeAnnotations_AddSubsetType(Environment *env, Word set, Word subset) {
 }
 
 double TypeAnnotations_AnnotationDistance(Environment *env, WordArrayList
-  annotation) {
+  *annotation) {
   double accum = 0.0;
   Word *st_focus = (ValueStack_GetAbsolutePointer(env->value_stack)
     - sizeof(Word));
 
-  for (unsigned int i = 0; i < annotation.size; i++) {
+  for (unsigned int i = 0; i < annotation->size; i++) {
     if ((void*)st_focus < env->value_stack->data) {
       return -1.0;
     }
 
     Word ver_word = *st_focus;
-    Word ann_word = annotation.data[i];
+    Word ann_word = annotation->data[i];
 
     unsigned short distance1d = TypeAnnotations_SubsetDistance(env, ann_word,
       ver_word);
@@ -140,13 +140,21 @@ double TypeAnnotations_AnnotationDistance(Environment *env, WordArrayList
     st_focus =
       (Word*)(((void*)st_focus) - Types_ResolveTypeSize(env,st_focus)) - 1;
   }
-  return sqrt(accum);
+  return accum;
 }
 
 void TypeAnnotations_MakeDefinition(Environment *env, Word
   word) {
   Word typeannotatedword = DefinitionTable_TokToWord(env->definition_table,
     TYPEANNOTATEDWORD);
+
+  Definition priori = DefinitionTable_GetDefinition(env->definition_table,
+    word);
+  if (priori.type.major == typeannotatedword.major
+    && priori.type.minor == typeannotatedword.minor) {
+    // The word already has a type annotated definition.
+    return;
+  }
 
   TypeAnnotatedDefinition *tadef = malloc(sizeof(TypeAnnotatedDefinition));
   tadef->size = 0;
@@ -162,7 +170,7 @@ void TypeAnnotations_MakeDefinition(Environment *env, Word
 }
 
 void TypeAnnotations_AddEntry(Environment *env, Word target, Word tocall,
-  WordArrayList annotation, WordArrayList production) {
+  WordArrayList *annotation, WordArrayList *production) {
 
   Word typeannotatedword = DefinitionTable_TokToWord(env->definition_table,
     TYPEANNOTATEDWORD);
@@ -179,12 +187,12 @@ void TypeAnnotations_AddEntry(Environment *env, Word target, Word tocall,
 
   for (unsigned int i = 0; i < tadef->size; i++) {
     AnnotationPair pair = tadef->pairs[i];
-    WordArrayList thisAnnotation = pair.annotation;
-    if (thisAnnotation.size == annotation.size) {
+    WordArrayList *thisAnnotation = pair.annotation;
+    if (thisAnnotation->size == annotation->size) {
       unsigned char matching = 1;
-      for (unsigned int j = 0; j < annotation.size; j++) {
-        Word focusWord = thisAnnotation.data[j];
-        Word otherWord = annotation.data[j];
+      for (unsigned int j = 0; j < annotation->size; j++) {
+        Word focusWord = thisAnnotation->data[j];
+        Word otherWord = annotation->data[j];
         if (focusWord.major != otherWord.major ||
           focusWord.minor != otherWord.minor) {
           matching = 0;
@@ -192,7 +200,8 @@ void TypeAnnotations_AddEntry(Environment *env, Word target, Word tocall,
         }
       }
       if (matching) {
-        free(tadef->pairs[i].production.data);
+        free(tadef->pairs[i].production->data);
+        free(tadef->pairs[i].production);
         tadef->pairs[i].production = production;
         tadef->pairs[i].tocall = tocall;
         return;
@@ -228,16 +237,16 @@ void __typeannotated(Environment *env) {
   unsigned int best_index = 0;
 
   for (unsigned int i = 0; i < annodef->size; i++) {
-    if (annodef->pairs[i].annotation.size < max_param) continue;
+    if (annodef->pairs[i].annotation->size < max_param) continue;
 
     double this_score = TypeAnnotations_AnnotationDistance(env,
       annodef->pairs[i].annotation);
 
     if (this_score == -1.0) continue;
 
-    if (annodef->pairs[i].annotation.size > max_param ||
+    if (annodef->pairs[i].annotation->size > max_param ||
       this_score < min_score) {
-      max_param = annodef->pairs[i].annotation.size;
+      max_param = annodef->pairs[i].annotation->size;
       min_score = this_score;
       best_index = i;
     }

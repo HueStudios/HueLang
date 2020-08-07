@@ -119,11 +119,9 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
   return result;
 }
 
-// Create a new word with a random name, sharing the same definition as
-// an original.
-Word DefinitionTable_MakeAnonymousDefinition (DefinitionTable *self,
-  Word original) {
-  char *original_name = DefinitionTable_GetName(self, original);
+// Create a new undefined word with a random name.
+Word DefinitionTable_CreateRandomUndefined (DefinitionTable *self,
+  char *original_name) {
   unsigned int original_len = strlen(original_name);
   unsigned int new_len = original_len + 1 + 16 + 1;
   char *new_name = malloc(sizeof(char) * new_len);
@@ -140,8 +138,24 @@ Word DefinitionTable_MakeAnonymousDefinition (DefinitionTable *self,
   }
   new_name[new_len-1] = '\0';
   Word result = DefinitionTable_TokToWord(self, new_name);
+  free(new_name);
+  Word undefinedword = DefinitionTable_TokToWord(self, UNDEFINEDWORD);
+  Definition resdef = DefinitionTable_GetDefinition(self, result);
+  if (resdef.type.major == undefinedword.major
+    && resdef.type.minor == undefinedword.minor) {
+    return result;
+  } else {
+    return DefinitionTable_CreateRandomUndefined(self, original_name);
+  }
+}
+
+// Create a new word with a random name, sharing the same definition as
+// an original.
+Word DefinitionTable_MakeAnonymousDefinition (DefinitionTable *self,
+  Word original) {
+  char *original_name = DefinitionTable_GetName(self, original);
+  Word result = DefinitionTable_CreateRandomUndefined(self, original_name);
   Definition def = DefinitionTable_GetDefinition(self, original);
   DefinitionTable_SetDefinition(self, result, def);
-  free(new_name);
   return result;
 }
