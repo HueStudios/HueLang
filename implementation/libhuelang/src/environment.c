@@ -74,7 +74,7 @@ Word Environment_PeekExecution(Environment *self) {
 // Evaluate a word in this environment.
 void Environment_Evaluate(Environment *self) {
   if (self->execution_stack == NULL) return;
-  Word word = Environment_PeekExecution(self);
+  volatile Word word = Environment_PeekExecution(self);
   Word primarydefinitiontype =
     DefinitionTable_TokToWord(self->definition_table, PRIMARYDEFINITIONWORD);
   // If the word is 'primary':

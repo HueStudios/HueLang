@@ -59,16 +59,15 @@ void __define_secondary (Environment *env) {
 
 void Secondary_Initialize(Environment *env) {
   Word secondaryword = DefinitionTable_TokToWord(env->definition_table,
-    SECONDARYDEFINITIONWORD);
+                                                   SECONDARYDEFINITIONWORD);
   Environment_AddPrimaryDefinition(env, secondaryword, &__secondary);
-
 
   Word defsec_intermediate = DefinitionTable_CreateRandomUndefined(
     env->definition_table,
     DEFINESECONDARYWORD
   );
   Environment_AddPrimaryDefinition(env, defsec_intermediate,
-    &__define_secondary);
+                                   &__define_secondary);
   Word listword = DefinitionTable_TokToWord(
     env->definition_table,
     LISTWORD
@@ -80,7 +79,7 @@ void Secondary_Initialize(Environment *env) {
 
   WordArrayList *defsec_annotation = malloc(sizeof(WordArrayList));
   defsec_annotation->size = 4;
-  defsec_annotation->data = malloc(sizeof(Word)*3);
+  defsec_annotation->data = malloc(sizeof(Word)*4);
   defsec_annotation->data[0] = wordword;
   defsec_annotation->data[1] = listword;
   defsec_annotation->data[2] = listword;
@@ -90,9 +89,10 @@ void Secondary_Initialize(Environment *env) {
   defsec_production->size = 0;
 
   Word defsecword = DefinitionTable_TokToWord(env->definition_table,
-    DEFINESECONDARYWORD);
+                                              DEFINESECONDARYWORD);
   TypeAnnotations_MakeDefinition(env, defsecword);
 
+
   TypeAnnotations_AddEntry(env, defsecword, defsec_intermediate,
-    defsec_annotation, defsec_production);
+                           defsec_annotation, defsec_production);
 }

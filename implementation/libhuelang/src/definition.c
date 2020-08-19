@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 #include "word.h"
 
 #define INITIAL_DEF_BUCKET_SIZE 2
@@ -121,8 +122,8 @@ Word DefinitionTable_TokToWord(DefinitionTable *self,
 
 // Create a new undefined word with a random name.
 Word DefinitionTable_CreateRandomUndefined (DefinitionTable *self,
-  char *original_name) {
-  unsigned int original_len = strlen(original_name);
+                                            char *original_name) {
+    unsigned int original_len = strlen(original_name);
   unsigned int new_len = original_len + 1 + 16 + 1;
   char *new_name = malloc(sizeof(char) * new_len);
   for (int i = 0; i < new_len - 1; i++) {
@@ -142,7 +143,7 @@ Word DefinitionTable_CreateRandomUndefined (DefinitionTable *self,
   Word undefinedword = DefinitionTable_TokToWord(self, UNDEFINEDWORD);
   Definition resdef = DefinitionTable_GetDefinition(self, result);
   if (resdef.type.major == undefinedword.major
-    && resdef.type.minor == undefinedword.minor) {
+      && resdef.type.minor == undefinedword.minor) {
     return result;
   } else {
     return DefinitionTable_CreateRandomUndefined(self, original_name);

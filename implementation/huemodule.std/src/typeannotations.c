@@ -131,14 +131,16 @@ double TypeAnnotations_AnnotationDistance(Environment *env, WordArrayList
     Word ann_word = annotation->data[i];
 
     unsigned short distance1d = TypeAnnotations_SubsetDistance(env, ann_word,
-      ver_word);
+                                                               ver_word);
     if (distance1d == USHRT_MAX) {
       return -1.0;
     }
     accum += ((double)distance1d)*((double)distance1d);
 
+    unsigned int to_lower = Types_ResolveTypeSize (env,st_focus);
+
     st_focus =
-      (Word*)(((void*)st_focus) - Types_ResolveTypeSize(env,st_focus)) - 1;
+      (Word*)((void*)st_focus - to_lower) - 1;
   }
   return accum;
 }
@@ -215,6 +217,7 @@ void TypeAnnotations_AddEntry(Environment *env, Word target, Word tocall,
   new_pair.tocall = tocall;
 
   tadef->pairs[tadef->size] = new_pair;
+  tadef->size++;
   if (tadef->size == tadef->max_size) {
     tadef->max_size *= 2;
     tadef->pairs = realloc(tadef->pairs, tadef->max_size);
@@ -228,7 +231,7 @@ void __typeannotated(Environment *env) {
   Word word = Environment_PopExecution(env);
   // Obtain the definition of the word.
   Definition worddef = DefinitionTable_GetDefinition(env->definition_table,
-    word);
+                                                     word);
 
   TypeAnnotatedDefinition *annodef = worddef.value.pointer;
 
@@ -240,7 +243,7 @@ void __typeannotated(Environment *env) {
     if (annodef->pairs[i].annotation->size < max_param) continue;
 
     double this_score = TypeAnnotations_AnnotationDistance(env,
-      annodef->pairs[i].annotation);
+                                                           annodef->pairs[i].annotation);
 
     if (this_score == -1.0) continue;
 
@@ -254,5 +257,13 @@ void __typeannotated(Environment *env) {
 
   if (min_score != DBL_MAX) {
     Environment_PushExecution(env, annodef->pairs[best_index].tocall);
+    Environment_Evaluate(env);
   }
+}
+
+void TypeAnnotations_Initialize(Environment *env)
+{
+  Word typeannotatedword = DefinitionTable_TokToWord(env->definition_table,
+                                                      TYPEANNOTATEDWORD);
+  Environment_AddPrimaryDefinition (env, typeannotatedword, &__typeannotated);
 }

@@ -5,6 +5,7 @@
 #include "type.h"
 #include "list.h"
 #include <string.h>
+#include <signal.h>
 
 #define WORDLISTSTARTWORD "["
 #define WORDLISTENDWORD "]"
@@ -19,7 +20,7 @@ void __wordlist_preeval(Environment *env) {
   if (env->execution_stack == NULL) {
     return;
   }
-  Word word = Environment_PopExecution(env);
+  Word word = Environment_PeekExecution(env);
   char *name = DefinitionTable_GetName(env->definition_table, word);
   Word listdepthword = DefinitionTable_TokToWord(env->definition_table,
     LISTDEPTHWORD);
@@ -28,13 +29,13 @@ void __wordlist_preeval(Environment *env) {
   );
   unsigned int depth = listdepthworddef.value.number;
   unsigned char omit_quote = 0;
-  if (strcmp(name,WORDLISTSTARTWORD)) {
+  if (strcmp(name,WORDLISTSTARTWORD) == 0) {
     if (depth == 0) {
       omit_quote = 1;
     }
     depth++;
   }
-  if (strcmp(name,WORDLISTENDWORD)) {
+  if (strcmp(name,WORDLISTENDWORD) == 0) {
     depth--;
   }
   if (depth > 0 && !omit_quote) {
@@ -47,6 +48,7 @@ void __wordlist_preeval(Environment *env) {
     Word newword = DefinitionTable_TokToWord(env->definition_table,
       new_name);
     free(new_name);
+    Environment_PopExecution(env);
     Environment_PushExecution(env, newword);
   }
   if (listdepthworddef.value.number != depth) {
@@ -58,20 +60,23 @@ void __wordlist_preeval(Environment *env) {
 
 void __wordliststart(Environment *env) {
   Word liststartword = DefinitionTable_TokToWord(env->definition_table,
-    LISTSTARTWORD);
+                                                 LISTSTARTWORD);
   Environment_PushExecution(env, liststartword);
+  Environment_Evaluate(env);
 }
 
 void __wordlistend(Environment *env) {
   Word listendword = DefinitionTable_TokToWord(env->definition_table,
-    LISTENDWORD);
+                                               LISTENDWORD);
   Environment_PushExecution(env, listendword);
+  Environment_Evaluate(env);
 }
 
 void WordLists_Initialize(Environment *env) {
   Word wlstartword = DefinitionTable_TokToWord(env->definition_table,
     WORDLISTSTARTWORD);
   Environment_AddPrimaryDefinition(env, wlstartword, &__wordliststart);
+//  raise(SIGINT);
 
   Word wlendword = DefinitionTable_TokToWord(env->definition_table,
     WORDLISTENDWORD);
@@ -97,7 +102,7 @@ void WordLists_Initialize(Environment *env) {
   Word old_preeval_mirror = DefinitionTable_MakeAnonymousDefinition(
     env->definition_table,
     preevalword
-  );
+                                                                    );
 
   Word compositeword = DefinitionTable_TokToWord(env->definition_table,
     COMPOSITEWORD);

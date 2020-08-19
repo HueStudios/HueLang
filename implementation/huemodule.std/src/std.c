@@ -4,6 +4,7 @@
 #include "list.h"
 #include "secondary.h"
 #include "wordlist.h"
+#include "typeannotations.h"
 
 #endif
 
@@ -19,5 +20,6 @@ void HueModule_Initialize (Environment *env) {
   Environment_AddPrimaryDefinition(env, helloword, &__hello);
   Lists_Initialize(env);
   WordLists_Initialize(env);
+  TypeAnnotations_Initialize(env);
   Secondary_Initialize(env);
 }
