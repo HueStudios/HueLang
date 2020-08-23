@@ -14,10 +14,10 @@ import Data.Stack
 someFunc :: IO ()
 someFunc = putStrLn "someFun"
 
-type Transformation = (Environment -> Environment)
+type Transformation = (Environment -> IO Environment)
 
 instance Show Transformation where
-  show t = "raw function"
+  show t = "{transformation}"
 
 instance Eq Transformation where
   (==) a b = False
@@ -71,12 +71,14 @@ getDefinition env word
   | hasDefinition env word = fromJust (Map.lookup word (definitionTable env))
   | otherwise = emptyValue
 
-evalUntilHalt :: Environment -> Environment
+evalUntilHalt :: Environment -> IO Environment
 evalUntilHalt env
-  | stackIsEmpty (executionStack env) = env
-  | otherwise = evalUntilHalt (evalOne env)
+  | stackIsEmpty (executionStack env) = return env
+  | otherwise = do
+      innerEnv <- evalOne env
+      evalUntilHalt innerEnv
 
-evalOne :: Environment -> Environment
+evalOne :: Environment -> IO Environment
 evalOne rawEnv
   | vtype def == simpleType "primary" = (fromJust (transformationv (getDefinition rawEnv "primary"))) rawEnv
   | otherwise = evalOne pushedType
@@ -87,15 +89,17 @@ evalOne rawEnv
     def = getDefinition env word
     pushedType = rawEnv{executionStack=stackPush (executionStack rawEnv) (fromJust (wordt (vtype def)))}
 
-__primary :: Environment -> Environment
+__primary :: Environment -> IO Environment
 __primary env = (fromJust (transformationv (getDefinition env stackTop))) envWithoutTop
   where
     pop = (fromJust (stackPop (executionStack env)))
     stackTop = snd pop
     envWithoutTop = env{executionStack=fst pop}
 
-__test :: Environment -> Environment
-__test env = env{ valueStack=stackPush (valueStack env) emptyValue{intv=Just 42,vtype=simpleType "number"} }
+__test :: Environment -> IO Environment
+__test env = do
+  putStrLn "Hue"
+  return env
 
 defaultEnv :: Environment
 defaultEnv = Environment
