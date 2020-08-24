@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module HueLang.Environment
     ( someFunc ) where
@@ -8,11 +8,7 @@ import qualified Data.Map as Map
 import Data.Maybe
 import Data.Either
 
-import Data.Stack (Stack)
 import Data.Stack
-
-someFunc :: IO ()
-someFunc = putStrLn "someFun"
 
 type Transformation = (Environment -> IO Environment)
 
@@ -36,6 +32,7 @@ data Vtype = Vtype
 
 data Value = Value
   { transformationv :: Maybe Transformation,
+    strv :: Maybe String,
     intv :: Maybe Int,
     doublev :: Maybe Double,
     boolv :: Maybe Bool,
@@ -54,6 +51,7 @@ emptyValue = Value
     doublev=Nothing,
     boolv=Nothing,
     listv=Nothing,
+    strv=Nothing,
     vtype=simpleType "undefined"
   }
 
@@ -64,7 +62,7 @@ data Environment = Environment
   } deriving (Eq, Show)
 
 hasDefinition :: Environment -> String -> Bool
-hasDefinition env word = (Map.member word (definitionTable env))
+hasDefinition env word = Map.member word (definitionTable env)
 
 getDefinition :: Environment -> String -> Value
 getDefinition env word
@@ -75,31 +73,43 @@ evalUntilHalt :: Environment -> IO Environment
 evalUntilHalt env
   | stackIsEmpty (executionStack env) = return env
   | otherwise = do
-      innerEnv <- evalOne env
+      preEnv <- evalOne $ pushExec env "preeval"
+      innerEnv <- evalOne preEnv
       evalUntilHalt innerEnv
+
+popExec :: Environment -> (Environment, String)
+popExec env = (nenv, word)
+  where
+    (nstack, word) = fromJust (stackPop (executionStack env))
+    nenv = env{executionStack=nstack}
+
+pushExec :: Environment -> String -> Environment
+pushExec env word = nenv
+  where
+    nenv = env{executionStack=stackPush (executionStack env) word}
 
 evalOne :: Environment -> IO Environment
 evalOne rawEnv
-  | vtype def == simpleType "primary" = (fromJust (transformationv (getDefinition rawEnv "primary"))) rawEnv
+  | vtype def == simpleType "primary" = fromJust (transformationv (getDefinition rawEnv "primary")) rawEnv
   | otherwise = evalOne pushedType
   where
-    pop = (fromJust (stackPop (executionStack rawEnv)))
-    word = snd pop
-    env = rawEnv{executionStack=fst pop}
+    (env, word) = popExec rawEnv
     def = getDefinition env word
-    pushedType = rawEnv{executionStack=stackPush (executionStack rawEnv) (fromJust (wordt (vtype def)))}
+    pushedType = pushExec rawEnv (fromJust (wordt (vtype def)))
 
 __primary :: Environment -> IO Environment
-__primary env = (fromJust (transformationv (getDefinition env stackTop))) envWithoutTop
+__primary env = fromJust (transformationv (getDefinition env stackTop)) envWithoutTop
   where
-    pop = (fromJust (stackPop (executionStack env)))
-    stackTop = snd pop
-    envWithoutTop = env{executionStack=fst pop}
+    (envWithoutTop, stackTop) = popExec env
 
-__test :: Environment -> IO Environment
-__test env = do
-  putStrLn "Hue"
-  return env
+__undefined :: Environment -> IO Environment
+__undefined env = do
+  let (nenv, word) = popExec env
+  putStrLn ("Word >" ++ word ++ "< is undefined")
+  return nenv
+
+__preeval :: Environment -> IO Environment
+__preeval = return
 
 defaultEnv :: Environment
 defaultEnv = Environment
@@ -107,7 +117,8 @@ defaultEnv = Environment
     definitionTable = Map.fromList
     [
       ("primary",emptyValue{transformationv=Just __primary,vtype=simpleType "primary"}),
-      ("test",emptyValue{transformationv=Just __test,vtype=simpleType "primary"})
+      ("undefined",emptyValue{transformationv=Just __undefined,vtype=simpleType "primary"}),
+      ("preeval",emptyValue{transformationv=Just __preeval,vtype=simpleType "primary"})
     ],
     executionStack = stackNew,
     valueStack = stackNew
