@@ -12,7 +12,24 @@ import Data.Stack
 type Transformation = (Environment -> IO Environment)
 
 instance Show Transformation where
-  show t = "{transformation}"
+  show t = "transformation"
+
+instance Show Vtype where
+  show t
+    | isJust (wordt t) = fromJust $ wordt t
+    | otherwise = "complex"
+
+instance Show Value where
+  show v = " " ++ show (vtype v) ++ " {" ++ inner ++ "}"
+    where
+      inner
+        | isJust (strv v) = show $ fromJust $ strv v
+        | isJust (intv v) = show $ fromJust $ intv v
+        | isJust (doublev v) = show $ fromJust $ doublev v
+        | isJust (boolv v) = show $ fromJust $ boolv v
+        | isJust (listv v) = show $ fromJust $ listv v
+        | isJust (transformationv v) = show $ fromJust $ transformationv v
+        | otherwise = "{}"
 
 instance Eq Transformation where
   (==) a b = False
@@ -27,7 +44,7 @@ data Vtype = Vtype
   {
     wordt :: Maybe String,
     listt :: Maybe [Vtype]
-  } deriving (Eq, Show)
+  } deriving (Eq)
 
 data Value = Value
   { transformationv :: Maybe Transformation,
@@ -37,7 +54,7 @@ data Value = Value
     boolv :: Maybe Bool,
     listv :: Maybe [Value],
     vtype :: Vtype
-  } deriving (Eq, Show)
+  } deriving (Eq)
 
 simpleType :: String -> Vtype
 simpleType name = Vtype {wordt=Just name,listt=Nothing}
@@ -90,6 +107,11 @@ pushExec env word = nenv
   where
     nenv = env{executionStack=stackPush (executionStack env) word}
 
+pushValue :: Environment -> Value -> Environment
+pushValue env val = nenv
+  where
+    nenv = env{valueStack=stackPush (valueStack env) val}
+
 evalOne :: Environment -> IO Environment
 evalOne rawEnv
   | vtype def == simpleType "primary" = fromJust (transformationv (getDefinition rawEnv "primary")) rawEnv
@@ -128,6 +150,16 @@ __condcomp env = do
     secondPart inenv -- If the stopcomp flag is enabled, stop composing.
       | fromJust (boolv (getDefinition inenv "__stopcomp")) = return inenv
       | otherwise = evalOne $ pushExec inenv secondWord -- Otherwise do compose.
+
+__wordcomprehension :: Environment -> IO Environment
+__wordcomprehension env = return nenv
+  where
+    (poppedExec, stackTop) = popExec env
+    pushed = pushValue poppedExec emptyValue{strv=Just (tail stackTop),vtype=simpleType "word"}
+    definedFlag = setDefinition pushed "__stopcomp" emptyValue{boolv=Just True, vtype=simpleType "flag"}
+    nenv
+      | head stackTop == ':' = definedFlag
+      | otherwise = env
       
 defaultEnv :: Environment
 defaultEnv = Environment
@@ -135,8 +167,16 @@ defaultEnv = Environment
     definitionTable = Map.fromList
     [
       ("primary",emptyValue{transformationv=Just __primary,vtype=simpleType "primary"}),
-      ("undefined",emptyValue{transformationv=Just __undefined,vtype=simpleType "primary"}),
-      ("preeval",emptyValue{transformationv=Just __preeval,vtype=simpleType "primary"})
+      ("undefined",
+        emptyValue{listv=Just [
+                      emptyValue{strv=Just "wordcomprehension"},
+                      emptyValue{strv=Just "__undefined-final"}
+                      ],
+        vtype=simpleType "condcomp"}),
+      ("__undefined-final",emptyValue{transformationv=Just __undefined,vtype=simpleType "primary"}),
+      ("preeval",emptyValue{transformationv=Just __preeval,vtype=simpleType "primary"}),
+      ("wordcomprehension",emptyValue{transformationv=Just __wordcomprehension,vtype=simpleType "primary"}),
+      ("condcomp",emptyValue{transformationv=Just __condcomp,vtype=simpleType "primary"})
     ],
     executionStack = stackNew,
     valueStack = stackNew
