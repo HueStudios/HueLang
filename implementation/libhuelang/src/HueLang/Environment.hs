@@ -1,12 +1,11 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module HueLang.Environment
-    ( someFunc ) where
+    () where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Maybe
-import Data.Either
 
 import Data.Stack
 
@@ -69,6 +68,9 @@ getDefinition env word
   | hasDefinition env word = fromJust (Map.lookup word (definitionTable env))
   | otherwise = emptyValue
 
+setDefinition :: Environment -> String -> Value -> Environment
+setDefinition env word value = env {definitionTable = Map.insert word value (definitionTable env)}
+
 evalUntilHalt :: Environment -> IO Environment
 evalUntilHalt env
   | stackIsEmpty (executionStack env) = return env
@@ -111,6 +113,22 @@ __undefined env = do
 __preeval :: Environment -> IO Environment
 __preeval = return
 
+__condcomp :: Environment -> IO Environment
+__condcomp env = do
+    inter <- pushedFirst
+    secondPart inter
+  where
+    (popped, toEval) = popExec env -- Pop word from the top
+    initFlag = setDefinition popped "__stopcomp" emptyValue{boolv=Just False, vtype=simpleType "flag"}
+    condcompDef = fromJust $ listv $ getDefinition initFlag toEval -- Get the definition
+    extractIndex def index = fromJust $ strv $ def !! index -- Extract a particular index
+    firstWord = extractIndex condcompDef 0
+    secondWord = extractIndex condcompDef 1
+    pushedFirst = evalOne $ pushExec initFlag firstWord -- Push first word
+    secondPart inenv -- If the stopcomp flag is enabled, stop composing.
+      | fromJust (boolv (getDefinition inenv "__stopcomp")) = return inenv
+      | otherwise = evalOne $ pushExec inenv secondWord -- Otherwise do compose.
+      
 defaultEnv :: Environment
 defaultEnv = Environment
   {
