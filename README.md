@@ -2,7 +2,7 @@
 
 ![logo](https://raw.githubusercontent.com/HueStudios/HueLang/master/docs/logo.png)
 
-A language designed to do everything.
+A language designed to do everything (It doesn't actually do a lot at the moment).
 
 ## Goals
 
