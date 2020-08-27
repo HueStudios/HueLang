@@ -15,24 +15,20 @@ instance Show Transformation where
   show t = "transformation"
 
 instance Show Vtype where
-  show t
-    | isJust (wordt t) = fromJust $ wordt t
-    | otherwise = "complex"
+  show (WordT name) = name
+  show (ListT _) = "complex"
 
 instance Show Value where
-  show v = " " ++ show (vtype v) ++ " {" ++ inner ++ "}"
-    where
-      inner
-        | isJust (strv v) = show $ fromJust $ strv v
-        | isJust (intv v) = show $ fromJust $ intv v
-        | isJust (doublev v) = show $ fromJust $ doublev v
-        | isJust (boolv v) = show $ fromJust $ boolv v
-        | isJust (listv v) = show $ fromJust $ listv v
-        | isJust (transformationv v) = show $ fromJust $ transformationv v
-        | otherwise = "{}"
+  show (TransformationV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (StringV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (IntV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (DoubleV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (BoolV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (ListV inner t) = show t ++ " {" ++ show inner ++ "}"
+  show (EmptyV t) = show t ++ " {}"
 
 instance Eq Transformation where
-  (==) a b = False
+  (==) a b = True
 
 instance Eq (Stack String) where
   (==) a b = show a == show b
@@ -40,36 +36,24 @@ instance Eq (Stack String) where
 instance Eq (Stack Value) where
   (==) a b = show a == show b
 
-data Vtype = Vtype
-  {
-    wordt :: Maybe String,
-    listt :: Maybe [Vtype]
-  } deriving (Eq)
+data Vtype = WordT String | ListT [Vtype] deriving Eq
 
-data Value = Value
-  { transformationv :: Maybe Transformation,
-    strv :: Maybe String,
-    intv :: Maybe Int,
-    doublev :: Maybe Double,
-    boolv :: Maybe Bool,
-    listv :: Maybe [Value],
-    vtype :: Vtype
-  } deriving (Eq)
+data Value = TransformationV Transformation Vtype
+           | StringV String Vtype
+           | IntV Int Vtype
+           | DoubleV Double Vtype
+           | BoolV Bool Vtype
+           | EmptyV Vtype
+           | ListV [Value] Vtype deriving (Eq)
 
-simpleType :: String -> Vtype
-simpleType name = Vtype {wordt=Just name,listt=Nothing}
-
-emptyValue :: Value
-emptyValue = Value
-  {
-    transformationv=Nothing,
-    intv=Nothing,
-    doublev=Nothing,
-    boolv=Nothing,
-    listv=Nothing,
-    strv=Nothing,
-    vtype=simpleType "undefined"
-  }
+getType :: Value -> Vtype
+getType (TransformationV _ t) = t
+getType (StringV _ t) = t
+getType (IntV _ t) = t
+getType (DoubleV _ t) = t
+getType (BoolV _ t) = t
+getType (ListV _ t) = t
+getType (EmptyV t) = t
 
 data Environment = Environment
   { definitionTable :: Map String Value,
@@ -83,7 +67,7 @@ hasDefinition env word = Map.member word (definitionTable env)
 getDefinition :: Environment -> String -> Value
 getDefinition env word
   | hasDefinition env word = fromJust (Map.lookup word (definitionTable env))
-  | otherwise = emptyValue
+  | otherwise = EmptyV $ WordT "undefined"
 
 setDefinition :: Environment -> String -> Value -> Environment
 setDefinition env word value = env {definitionTable = Map.insert word value (definitionTable env)}
@@ -114,17 +98,25 @@ pushValue env val = nenv
 
 evalOne :: Environment -> IO Environment
 evalOne rawEnv
-  | vtype def == simpleType "primary" = fromJust (transformationv (getDefinition rawEnv "primary")) rawEnv
+  | defType == WordT "primary" = case def of TransformationV _ _ -> primDef rawEnv
+                                             _ -> error "Primary definition must be a transformation"
   | otherwise = evalOne pushedType
   where
+    primDef = case getDefinition rawEnv "primary" of TransformationV p _ -> p
+                                                     _ -> error "Definition of primary must be a transformation"
     (env, word) = popExec rawEnv
     def = getDefinition env word
-    pushedType = pushExec rawEnv (fromJust (wordt (vtype def)))
+    defType = getType def
+    pushedType = case defType of WordT w -> pushExec rawEnv w
+                                 _ -> error "Definition type must be a simple word"
+
 
 __primary :: Environment -> IO Environment
-__primary env = fromJust (transformationv (getDefinition env stackTop)) envWithoutTop
+__primary env = case def of TransformationV trans (WordT "primary") -> trans envWithoutTop
+                            _ -> error "Primary definition must be a transformation"
   where
     (envWithoutTop, stackTop) = popExec env
+    def = getDefinition envWithoutTop stackTop
 
 __undefined :: Environment -> IO Environment
 __undefined env = do
@@ -137,26 +129,30 @@ __preeval = return
 
 __condcomp :: Environment -> IO Environment
 __condcomp env = do
-    inter <- pushedFirst
-    secondPart inter
-  where
-    (popped, toEval) = popExec env -- Pop word from the top
-    initFlag = setDefinition popped "__stopcomp" emptyValue{boolv=Just False, vtype=simpleType "flag"}
-    condcompDef = fromJust $ listv $ getDefinition initFlag toEval -- Get the definition
-    extractIndex def index = fromJust $ strv $ def !! index -- Extract a particular index
-    firstWord = extractIndex condcompDef 0
-    secondWord = extractIndex condcompDef 1
-    pushedFirst = evalOne $ pushExec initFlag firstWord -- Push first word
-    secondPart inenv -- If the stopcomp flag is enabled, stop composing.
-      | fromJust (boolv (getDefinition inenv "__stopcomp")) = return inenv
-      | otherwise = evalOne $ pushExec inenv secondWord -- Otherwise do compose.
+  inter <- pushedFirst
+  secondPart inter
+    where
+      (popped, toEval) = popExec env -- Pop word from the top
+      initFlag = setDefinition popped "__stopcomp" $ BoolV False $ WordT "flag"
+      condcompDef = case getDefinition initFlag toEval of ListV l (WordT "condcomp") -> l -- Get the definition
+                                                          _ -> error "Condcomp def must be a list"
+      extractIndex def index = case def !! index of StringV s _ -> s -- Extract a particular index
+                                                    _ -> error "Condcomp def element must be a string"
+      firstWord = extractIndex condcompDef 0
+      secondWord = extractIndex condcompDef 1
+      pushedFirst = evalOne $ pushExec initFlag firstWord -- Push first word
+      stopComp e = case getDefinition e "__stopcomp" of BoolV b (WordT "flag") -> b
+                                                        _ -> error "Stopcomp flag must be a bool"
+      secondPart inenv -- If the stopcomp flag is enabled, stop composing.
+        | stopComp inenv = return inenv
+        | otherwise = evalOne $ pushExec inenv secondWord -- Otherwise do compose.
 
 __wordcomprehension :: Environment -> IO Environment
 __wordcomprehension env = return nenv
   where
     (poppedExec, stackTop) = popExec env
-    pushed = pushValue poppedExec emptyValue{strv=Just (tail stackTop),vtype=simpleType "word"}
-    definedFlag = setDefinition pushed "__stopcomp" emptyValue{boolv=Just True, vtype=simpleType "flag"}
+    pushed = pushValue poppedExec $ StringV (tail stackTop) $ WordT "word"
+    definedFlag = setDefinition pushed "__stopcomp" $ BoolV True $ WordT "flag"
     nenv
       | head stackTop == ':' = definedFlag
       | otherwise = env
@@ -166,17 +162,13 @@ defaultEnv = Environment
   {
     definitionTable = Map.fromList
     [
-      ("primary",emptyValue{transformationv=Just __primary,vtype=simpleType "primary"}),
-      ("undefined",
-        emptyValue{listv=Just [
-                      emptyValue{strv=Just "wordcomprehension"},
-                      emptyValue{strv=Just "__undefined-final"}
-                      ],
-        vtype=simpleType "condcomp"}),
-      ("__undefined-final",emptyValue{transformationv=Just __undefined,vtype=simpleType "primary"}),
-      ("preeval",emptyValue{transformationv=Just __preeval,vtype=simpleType "primary"}),
-      ("wordcomprehension",emptyValue{transformationv=Just __wordcomprehension,vtype=simpleType "primary"}),
-      ("condcomp",emptyValue{transformationv=Just __condcomp,vtype=simpleType "primary"})
+      ("primary",TransformationV __primary $ WordT "primary"),
+      ("undefined",ListV [StringV "wordcomprehension" $ WordT "undefined",
+                          StringV "__undefined-final" $ WordT "undefined"] $ WordT "condcomp"),
+      ("__undefined-final",TransformationV __undefined $ WordT "primary"),
+      ("preeval",TransformationV __preeval $ WordT "primary"),
+      ("wordcomprehension",TransformationV __wordcomprehension $ WordT "primary"),
+      ("condcomp",TransformationV __condcomp $ WordT "primary")
     ],
     executionStack = stackNew,
     valueStack = stackNew
