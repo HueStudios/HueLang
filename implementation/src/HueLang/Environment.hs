@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module HueLang.Environment
-    () where
+    (Transformation, Vtype, Value, Environment, getType, hasDefinition, getDefinition,
+    setDefinition, evalUntilHalt, popExec, pushExec, pushValue, evalOne, defaultEnv) where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
@@ -99,11 +100,13 @@ pushValue env val = nenv
 evalOne :: Environment -> IO Environment
 evalOne rawEnv
   | defType == WordT "primary" = case def of TransformationV _ _ -> primDef rawEnv
-                                             _ -> error "Primary definition must be a transformation"
+                                             _ -> error ("Primary definition must be" ++
+                                               "a transformation")
   | otherwise = evalOne pushedType
   where
     primDef = case getDefinition rawEnv "primary" of TransformationV p _ -> p
-                                                     _ -> error "Definition of primary must be a transformation"
+                                                     _ -> error ("Definition of primary must" ++
+                                                       "be a transformation")
     (env, word) = popExec rawEnv
     def = getDefinition env word
     defType = getType def
@@ -134,10 +137,11 @@ __condcomp env = do
     where
       (popped, toEval) = popExec env -- Pop word from the top
       initFlag = setDefinition popped "__stopcomp" $ BoolV False $ WordT "flag"
-      condcompDef = case getDefinition initFlag toEval of ListV l (WordT "condcomp") -> l -- Get the definition
+      condcompDef = case getDefinition initFlag toEval of ListV l (WordT "condcomp") -> l
                                                           _ -> error "Condcomp def must be a list"
       extractIndex def index = case def !! index of StringV s _ -> s -- Extract a particular index
-                                                    _ -> error "Condcomp def element must be a string"
+                                                    _ -> error ("Condcomp def element must" ++
+                                                      "be a string")
       firstWord = extractIndex condcompDef 0
       secondWord = extractIndex condcompDef 1
       pushedFirst = evalOne $ pushExec initFlag firstWord -- Push first word
