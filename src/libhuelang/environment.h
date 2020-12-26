@@ -1,11 +1,24 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include <stack>
+#include "word.h"
+#include "definition.h"
+
+#define PRIMARYDEFINITIONWORD "primary"
+#define PREEVALWORD "preeval"
+
+using namespace std;
+
 namespace huelang {
 
     class Environment {
         public:
-            void hue();
+            void Evaluate();
+            void Run();
+        private:
+            stack<Word> executionStack;
+            DefinitionTable definitionTable;
     };
 
 };

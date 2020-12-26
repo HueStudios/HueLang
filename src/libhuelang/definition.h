@@ -15,6 +15,7 @@ namespace huelang {
     union DefinitionValue {
         void *pointer;
         long number;
+        void (*handler)(const Environment&);
     };
 
     struct Definition {

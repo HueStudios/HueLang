@@ -8,7 +8,7 @@ namespace huelang {
         unsigned short major;
         unsigned long minor;
     };
-    
+    bool operator==(const Word& a, const Word& b);
 
 }
 
