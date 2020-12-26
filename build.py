@@ -54,7 +54,7 @@ def build_binary(mode, name, kind, cflags, lflags):
             if not ec == 0:
                 termcolor.cprint("<!> Unable to build {}".format(source_path),
                                  "red")
-                exit()
+                exit(200)
 
     if not os.path.isdir("bin"):
         os.mkdir("bin")
@@ -77,7 +77,7 @@ def build_binary(mode, name, kind, cflags, lflags):
     if not ec == 0:
         termcolor.cprint("<!> Unable to build {}".format(source_path),
                          "red")
-        exit()
+        exit(201)
     termcolor.cprint("<!> Done", "green")
 
 

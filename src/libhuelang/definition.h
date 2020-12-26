@@ -33,7 +33,7 @@ namespace huelang {
             vector<DefinitionTableEntry> buckets[0xFF + 1];
             unsigned long long HashString(const char *str);
         public:
-            Word operator[](string tok);
+            Word TokToWord(string tok);
             Definition& operator[](Word word);
     };
 
