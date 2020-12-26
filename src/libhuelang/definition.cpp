@@ -2,7 +2,7 @@
 
 namespace huelang {
 
-    unsigned long long HashString(const char *str) {
+    unsigned long long DefinitionTable::HashString(const char *str) {
         unsigned long long hash = 5381;
         int c;
 

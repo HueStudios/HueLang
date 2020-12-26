@@ -12,7 +12,7 @@ using namespace std;
 
 namespace huelang {
 
-    typedef union DefinitionValue {
+    union DefinitionValue {
         void *pointer;
         long number;
     };
