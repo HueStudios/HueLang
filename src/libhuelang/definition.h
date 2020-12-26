@@ -12,6 +12,8 @@ using namespace std;
 
 namespace huelang {
 
+    class Environment;
+
     union DefinitionValue {
         void *pointer;
         long number;
@@ -39,5 +41,7 @@ namespace huelang {
     };
 
 };
+
+#include "environment.h"
 
 #endif

@@ -9,6 +9,5 @@ using namespace huelang;
 int main(int argc, char const *argv[])
 {
     Environment *env = new Environment();
-    env->hue();
     return 0;
 }

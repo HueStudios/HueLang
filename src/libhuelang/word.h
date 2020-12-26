@@ -1,5 +1,5 @@
 #ifndef WORD_H
-#define WORD_h
+#define WORD_H
 
 namespace huelang {
 
