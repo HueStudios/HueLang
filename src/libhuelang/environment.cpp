@@ -3,6 +3,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace huelang;
 
 void Environment::hue() {
     cout << "hue?" << endl;

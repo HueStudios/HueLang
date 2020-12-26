@@ -4,6 +4,7 @@
 #include "../libhuelang/environment.h"
 
 using namespace std;
+using namespace huelang;
 
 int main(int argc, char const *argv[])
 {
