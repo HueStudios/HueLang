@@ -3,12 +3,13 @@
 
 #include <vector>
 #include "word.h"
-#include "environment.h"
 
 using namespace std;
 
 namespace huelang
 {
+
+    class Environment;
 
     struct ValueType {
         vector<ValueType> *compound;
@@ -18,8 +19,10 @@ namespace huelang
 
     class Value {
         public:
-            virtual ValueType getType(Environment& env) = 0;
+            ValueType getType(Environment& env);
     };
 };
+
+#include "environment.h"
 
 #endif

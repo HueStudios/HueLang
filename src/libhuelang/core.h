@@ -1,6 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include <stdio.h>
+#include <iostream>
+
 #define WORDWORD "word"
 #define STOPCOMPWORD "__stopcomposition?"
 #define WORDCOMPREHENSIONWORD "__wordcomprehension"
@@ -9,9 +12,6 @@
 #define COMPOSITEWORD "composite"
 #define INACTIONWORD "inaction"
 
-#include <stdio.h>
-#include <iostream>
-
 #include "word.h"
 #include "value.h"
 #include "definition.h"
@@ -19,9 +19,9 @@
 namespace huelang
 {
     class WordValue: public Value {
-        ValueType getType(Environment& env);
         Word contained;
         public: 
+            ValueType getType(Environment& env);
             WordValue(Word to_contain);
     };
 
@@ -33,6 +33,5 @@ namespace huelang
     void __inaction(Environment& env);
     void InitializeCore(Environment& env);
 } // namespace huelang
-
 
 #endif
