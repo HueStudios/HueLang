@@ -42,4 +42,8 @@ namespace huelang {
         return buckets[word.major][word.minor].definition;
     }
 
+    string DefinitionTable::GetName(Word word) {
+        return buckets[word.major][word.minor].name;
+    }
+
 };

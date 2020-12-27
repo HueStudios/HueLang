@@ -37,6 +37,7 @@ namespace huelang {
             unsigned long long HashString(const char *str);
         public:
             Word TokToWord(string tok);
+            string GetName(Word word);
             Definition& operator[](Word word);
     };
 

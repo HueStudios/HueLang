@@ -4,6 +4,7 @@
 #include <stack>
 #include "word.h"
 #include "definition.h"
+#include "value.h"
 
 #define PRIMARYDEFINITIONWORD "primary"
 #define PREEVALWORD "preeval"
@@ -18,6 +19,7 @@ namespace huelang {
             void Run();
             DefinitionTable definitionTable;
             stack<Word> executionStack;
+            stack<Value> valueStack;
         private:
             
     };
