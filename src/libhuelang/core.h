@@ -25,6 +25,12 @@ namespace huelang
             WordValue(Word to_contain);
     };
 
+    struct CompositeDefinition
+    {
+        Word f;
+        Word g;
+    };
+
     void __primary(Environment& env);
     void __undefined_final(Environment& env);
     void __instate_flag(Environment& env);

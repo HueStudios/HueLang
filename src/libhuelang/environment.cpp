@@ -1,6 +1,5 @@
 #include "environment.h"
-#include <stdio.h>
-#include <iostream>
+
 
 using namespace std;
 
@@ -33,6 +32,14 @@ namespace huelang
             Evaluate();
             Evaluate();
         }
+    }
+
+    void Environment::AddPrimaryDefinition(Word word, 
+        void (*handler)(Environment&)) {
+        Word primarydefinitiontype 
+            = definitionTable.TokToWord(PRIMARYDEFINITIONWORD);
+        definitionTable[word].type = primarydefinitiontype;
+        definitionTable[word].value.handler = handler;
     }
 
 } // namespace huelang

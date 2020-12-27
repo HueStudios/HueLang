@@ -9,6 +9,9 @@
 #define PRIMARYDEFINITIONWORD "primary"
 #define PREEVALWORD "preeval"
 
+#include <stdio.h>
+#include <iostream>
+
 using namespace std;
 
 namespace huelang {
@@ -17,6 +20,7 @@ namespace huelang {
         public:
             void Evaluate();
             void Run();
+            void AddPrimaryDefinition(Word word, void (*handler)(Environment&));
             DefinitionTable definitionTable;
             stack<Word> executionStack;
             stack<Value> valueStack;
