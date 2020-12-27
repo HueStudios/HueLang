@@ -17,8 +17,9 @@ namespace huelang {
             void Evaluate();
             void Run();
             DefinitionTable definitionTable;
-        private:
             stack<Word> executionStack;
+        private:
+            
     };
 
 };

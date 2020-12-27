@@ -18,7 +18,7 @@ namespace huelang
 
     class Value {
         public:
-            virtual ValueType getType(const Environment& env) = 0;
+            virtual ValueType getType(Environment& env) = 0;
     };
 };
 

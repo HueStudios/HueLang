@@ -15,7 +15,7 @@ namespace huelang
         if (primarydefinitiontype == word) {
             Definition primarydefinition 
                 = definitionTable[primarydefinitiontype];
-            void (*defhandler)(const Environment&) 
+            void (*defhandler)(Environment&) 
                 = primarydefinition.value.handler;
             defhandler(*this);
         } else {
