@@ -23,17 +23,16 @@ namespace huelang {
                 return result;
             }
         }
-
-        if (token != UNDEFINEDWORD) {
-            Definition defaultdef;
-            defaultdef.value.number = 0;
+        Definition defaultdef;
+        defaultdef.value.number = 0;
+        if (token != UNDEFINEDWORD) {    
             defaultdef.type = TokToWord(UNDEFINEDWORD);
-            result.minor = buckets[bucket_index].size();
-            buckets[bucket_index].push_back(DefinitionTableEntry{
-                token,
-                defaultdef
-            });
         }
+        result.minor = buckets[bucket_index].size();
+        buckets[bucket_index].push_back(DefinitionTableEntry{
+            token,
+            defaultdef
+        });
         
         return result;
     }

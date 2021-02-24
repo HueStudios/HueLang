@@ -33,9 +33,9 @@ namespace huelang {
 
     class DefinitionTable {
         private:
-            vector<DefinitionTableEntry> buckets[0xFF + 1];
             unsigned long long HashString(const char *str);
         public:
+            vector<DefinitionTableEntry> buckets[DEF_BUCKET_COUNT + 1];
             Word TokToWord(string tok);
             string GetName(Word word);
             Definition& operator[](Word word);

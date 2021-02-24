@@ -76,7 +76,7 @@ namespace huelang
         env.Evaluate();
 
         if (stcompdef.value.number != 1) {
-            env.executionStack.push(compdef->f);
+            env.executionStack.push(compdef->g);
             env.Evaluate();
         }
     }
@@ -86,8 +86,8 @@ namespace huelang
         env.executionStack.pop();        
     }
 
-    void InititializeCore(Environment& env) {
-        Word wordword = env.definitionTable.TokToWord(WORDWORD);
+    void InitializeCore(Environment& env) {
+        //Word wordword = env.definitionTable.TokToWord(WORDWORD);
 
         Word primaryword = env.definitionTable.TokToWord(PRIMARYDEFINITIONWORD);
         env.AddPrimaryDefinition(primaryword, &__primary);
