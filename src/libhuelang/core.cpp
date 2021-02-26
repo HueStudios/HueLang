@@ -29,7 +29,7 @@ namespace huelang
         Word word = env.executionStack.top();
         env.executionStack.pop();
         string name = env.definitionTable.GetName(word);
-        cout << "Undefined word >" << name << "<" << endl;
+        cerr << "Undefined word >" << name << "<" << endl;
     }
 
     void __instate_flag(Environment& env) {
@@ -47,7 +47,7 @@ namespace huelang
         if (name[0] == ':') {
             string word_lit_name = name.substr(1);
             Word word_lit = env.definitionTable.TokToWord(word_lit_name);
-            env.valueStack.push(WordValue{word_lit});
+            env.valueStack.push(new WordValue(word_lit));
 
             Word stopCompWord = env.definitionTable.TokToWord(STOPCOMPWORD);
             Word flagType = env.definitionTable.TokToWord(INTSTATEFLAG);
@@ -86,6 +86,41 @@ namespace huelang
         env.executionStack.pop();        
     }
 
+
+    void __use(Environment& env) {
+
+        WordValue *wordvalue = (WordValue*)env.valueStack.top();
+        env.valueStack.pop();
+
+        string wname = env.definitionTable.GetName(wordvalue->contained);
+
+        string module_filename = "huemodule." + wname + ".so";
+
+        void *handle = dlopen(module_filename.c_str(), RTLD_LAZY);
+
+        if (handle) {
+            dlerror();
+
+            void (*ModuleEntry)(Environment *) = (void (*)(Environment*)) dlsym(handle, "ModuleEntry");
+
+            char *error = dlerror();
+
+            if (error != NULL){
+                cerr << "Error while loading >" << wname << "<" << ": " <<
+                    error << endl;
+            } else {
+                ModuleEntry(&env);
+            }
+
+        } else {
+            cerr << "Unable to load >" << module_filename << "<" << endl;
+        }
+        free(wordvalue);
+    }
+
+
+
+
     void InitializeCore(Environment& env) {
         //Word wordword = env.definitionTable.TokToWord(WORDWORD);
 
@@ -122,5 +157,8 @@ namespace huelang
             = env.definitionTable[undefinedword];
         undefineddefinition.type = compositeword;
         undefineddefinition.value.pointer = undefinedworddefptr;
+
+        Word useword = env.definitionTable.TokToWord(USEWORD);
+        env.AddPrimaryDefinition(useword, __use);
     }
 } // namespace huelang

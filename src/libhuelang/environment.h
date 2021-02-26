@@ -23,7 +23,7 @@ namespace huelang {
             void AddPrimaryDefinition(Word word, void (*handler)(Environment&));
             DefinitionTable definitionTable;
             stack<Word> executionStack;
-            stack<Value> valueStack;
+            stack<Value*> valueStack;
         private:
             
     };

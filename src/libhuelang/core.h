@@ -11,16 +11,18 @@
 #define INTSTATEFLAG "__intstate"
 #define COMPOSITEWORD "composite"
 #define INACTIONWORD "inaction"
+#define USEWORD "use"
 
 #include "word.h"
 #include "value.h"
 #include "definition.h"
+#include <dlfcn.h>
 
 namespace huelang
 {
     class WordValue: public Value {
-        Word contained;
         public: 
+            Word contained;
             ValueType getType(Environment& env);
             WordValue(Word to_contain);
     };
