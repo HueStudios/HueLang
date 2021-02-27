@@ -8,4 +8,6 @@ using namespace huelang;
 
 extern "C" void ModuleEntry(Environment *env);
 
+void __hello(Environment &env);
+
 #endif
