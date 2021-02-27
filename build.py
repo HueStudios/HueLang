@@ -64,7 +64,8 @@ def build_binary(mode, name, kind, cflags, lflags):
             
             md5now = md5(source_path)
 
-            if os.path.isfile("md5/{}/{}.md5".format(name,file)):
+            if (os.path.isfile("md5/{}/{}.md5".format(name,file)) and not 
+                    mode == "release"):
                 with open("md5/{}/{}.md5".format(name,file),'r') as f:
                     oldmd5 = f.read()
                 if oldmd5 == md5now:
