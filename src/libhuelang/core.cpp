@@ -88,7 +88,7 @@ namespace huelang
 
 
     void __use(Environment& env) {
-
+ 
         WordValue *wordvalue = (WordValue*)env.valueStack.top();
         env.valueStack.pop();
 
@@ -101,7 +101,8 @@ namespace huelang
         if (handle) {
             dlerror();
 
-            void (*ModuleEntry)(Environment *) = (void (*)(Environment*)) dlsym(handle, "ModuleEntry");
+            void (*ModuleEntry)(Environment *) = (void (*)(Environment*)) 
+                dlsym(handle, "ModuleEntry");
 
             char *error = dlerror();
 

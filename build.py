@@ -84,3 +84,4 @@ def build_binary(mode, name, kind, cflags, lflags):
 if __name__ == "__main__":
     build_binary("debug", "libhuelang", "shared", "", "")
     build_binary("debug", "huelang", "executable", "", "-lhuelang -lboost_system -lreadline -ldl")
+    build_binary("debug", "huemodule.std", "shared", "", "-lhuelang")
