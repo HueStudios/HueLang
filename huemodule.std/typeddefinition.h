@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "../libhuelang/environment.h"
-#include "../libhuelang/value.h"
-#include "../libhuelang/word.h"
-#include "../libhuelang/definition.h"
+#include <lhuelang/environment.h>
+#include <lhuelang/value.h>
+#include <lhuelang/word.h>
+#include <lhuelang/definition.h>
 
 using namespace std;
 using namespace huelang;

@@ -1,8 +1,8 @@
 #ifndef STD_H
 #define STD_H
 
-#include "../libhuelang/environment.h"
-#include "../libhuelang/core.h"
+#include <lhuelang/environment.h>
+#include <lhuelang/core.h>
 #include <iostream>
 
 using namespace huelang;

@@ -1,9 +1,9 @@
 
 #include <iostream>
 #include <stdio.h>
-#include "../libhuelang/value.h"
-#include "../libhuelang/environment.h"
-#include "../libhuelang/core.h"
+#include <lhuelang/value.h>
+#include <lhuelang/environment.h>
+#include <lhuelang/core.h>
 #include "interpreter.h"
 #include <readline/readline.h>
 #include <readline/history.h>
