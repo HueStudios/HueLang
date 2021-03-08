@@ -16,14 +16,24 @@ using namespace std;
 
 namespace huelang {
 
+    class ExecutionStack : public stack<Word> {
+    public:
+        using stack<Word>::c;
+    };
+
+    class ValueStack : public stack<Value*> {
+    public:
+        using stack<Value*>::c;
+    };
+
     class Environment {
         public:
             void Evaluate();
             void Run();
             void AddPrimaryDefinition(Word word, void (*handler)(Environment&));
             DefinitionTable definitionTable;
-            stack<Word> executionStack;
-            stack<Value*> valueStack;
+            ExecutionStack executionStack;
+            ValueStack valueStack;
         private:
             
     };

@@ -16,6 +16,7 @@ namespace huelang
         Word atom;
         bool isCompound;
     };
+    bool operator==(const ValueType& a, const ValueType& b);
 
     class Value {
         public:

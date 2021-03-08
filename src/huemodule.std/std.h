@@ -2,6 +2,7 @@
 #define STD_H
 
 #include "../libhuelang/environment.h"
+#include "../libhuelang/core.h"
 #include <iostream>
 
 using namespace huelang;
